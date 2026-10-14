@@ -30,6 +30,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Set up Android SDK tools
+        uses: android-actions/setup-android@v4
       - name: Install Android SDK platform
         run: sdkmanager 'platforms;android-37'
       - name: Prepare release signing
