@@ -4,15 +4,13 @@
 # Usage:
 #   ./build.sh debug
 #   ./build.sh release
-#   ./build.sh playstore
 #   ./build.sh all
 #   ./build.sh gen-keystore
 #   ./build.sh update-newpipe [--check]
 #
 # Output:
-#   dist/youtube-aa-companion-debug-<version>.apk
-#   dist/youtube-aa-companion-release-<version>.apk
-#   dist/youtube-aa-companion-playstore-<version>.aab
+#   dist//youtube-companion-debug-<version>.apk
+#   dist//youtube-companion-release-<version>.apk
 #
 # Release / Play Store signing:
 #   Create keystore.properties (see keystore.properties.example).
@@ -142,7 +140,7 @@ build_debug() {
     ./gradlew clean assembleDebug
     mkdir -p "$DIST_DIR"
     local src="app/build/outputs/apk/debug/app-debug.apk"
-    local dest="$DIST_DIR/youtube-aa-companion-debug-$(version_name).apk"
+    local dest="$DIST_DIR//youtube-companion-debug-$(version_name).apk"
 
     if [[ ! -f "$src" ]]; then
         echo "ERROR: Debug APK was not created:"
@@ -163,7 +161,7 @@ build_release() {
     ./gradlew clean assembleRelease
     mkdir -p "$DIST_DIR"
     local src="app/build/outputs/apk/release/app-release.apk"
-    local dest="$DIST_DIR/youtube-aa-companion-release-$(version_name).apk"
+    local dest="$DIST_DIR//youtube-companion-release-$(version_name).apk"
 
     if [[ ! -f "$src" ]]; then
         echo
@@ -183,38 +181,6 @@ build_release() {
     echo "    $dest"
 }
 
-build_playstore() {
-    require_keystore
-    echo "==> Building GOOGLE PLAY Android App Bundle..."
-    echo
-    echo "    Version:      $(version_name)"
-    echo "    Version code: $(version_code)"
-    echo
-    ./gradlew clean bundleRelease
-    mkdir -p "$DIST_DIR"
-    local src="app/build/outputs/bundle/release/app-release.aab"
-    local dest="$DIST_DIR/youtube-aa-companion-playstore-$(version_name)-$(version_code).aab"
-
-    if [[ ! -f "$src" ]]; then
-        echo
-        echo "ERROR: Release AAB was not created:"
-        echo "       $src"
-        echo
-        echo "Check your Gradle signing configuration."
-        exit 1
-    fi
-
-    cp "$src" "$dest"
-
-    echo
-    echo "==> Play Store AAB:"
-    echo "    $dest"
-    echo
-    echo "==> Version:"
-    echo "    $(version_name) ($(version_code))"
-    echo
-    echo "This is the file to upload to Google Play Console."
-}
 
 case "$MODE" in
     update-newpipe)
@@ -233,14 +199,9 @@ case "$MODE" in
         build_release
         ;;
 
-    playstore)
-        build_playstore
-        ;;
-
     all)
         build_debug
         build_release
-        build_playstore
         ;;
 
     gen-keystore)
@@ -248,7 +209,7 @@ case "$MODE" in
         ;;
 
     *)
-        echo "Usage: $0 [debug|release|playstore|all|gen-keystore|update-newpipe [--check]]" >&2
+        echo "Usage: $0 [debug|release|all|gen-keystore|update-newpipe [--check]]" >&2
         exit 1
         ;;
 esac
