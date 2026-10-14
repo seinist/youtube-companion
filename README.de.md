@@ -12,9 +12,12 @@
 [![License: GPL v3 or later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0-E5A00D)](#build)
 
-[Features](#features) · [Einrichtung](#einrichtung) · [Build](#build) · [Grenzen](#bekannte-grenzen) · [Dokumentation](docs/DOCUMENTATION.de.md)
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/seinist)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/seinist)
 
-**Paket** `de.uni.youtubeaa` · **Version im Repository** `1.0.0` (1) · **Android** ab API 28
+[Features](#features) · [Unterstützen](#unterstützen) · [Einrichtung](#einrichtung) · [Build](#build) · [Grenzen](#bekannte-grenzen) · [Dokumentation](docs/DOCUMENTATION.de.md)
+
+**Paket** `de.uni.youtubeaa` · **Version im Repository** `1.0.0` · **Android** ab API 28
 
 </div>
 
@@ -30,6 +33,13 @@
 Videos am Handy finden, unterwegs als Audio hören und im geparkten Fahrzeug auf dem Auto-Display öffnen: YouTube Companion verbindet diese Oberflächen in einer App. Konto, gespeicherte Videos und Wiedergabestatus werden von der Smartphone-App und der Android-Auto-Integration gemeinsam verwendet.
 
 Das Projekt kombiniert den Android-Auto-Medienbrowser für Audio mit einer eigenen, inoffiziellen Projektionsoberfläche für Video. Es ist ein Sideload-/Uni-Projekt und kein offizieller YouTube-Client.
+
+## Unterstützen
+
+Wenn dir YouTube Companion gefällt, kannst du die Weiterentwicklung mit einem Kaffee oder einem GitHub-Sponsoring unterstützen. Vielen Dank! ☕
+
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/seinist)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/seinist)
 
 ## Features
 
