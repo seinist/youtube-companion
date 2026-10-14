@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="Konto">
+        <Preference
+            android:key="youtube_account"
+            android:title="YouTube-Konto"
+            android:summary="Nicht verknüpft" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Player-Standardwerte">
+        <ListPreference
+            android:key="default_tab"
+            android:title="Standard-Tab"
+            android:entries="@array/tab_entries"
+            android:entryValues="@array/tab_values"
+            android:defaultValue="home"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat
+            android:key="autoplay"
+            android:title="Autoplay"
+            android:summary="Nächstes Video in der Queue automatisch starten"
+            android:defaultValue="false" />
+        <SwitchPreferenceCompat
+            android:key="phone_audio_only"
+            android:title="Handy bevorzugt im Audio-Modus starten"
+            android:summary="Startet Wiedergabe auf dem Handy mit Audio-Stream; im Player kann jederzeit zu Video gewechselt werden"
+            android:defaultValue="false" />
+        <ListPreference
+            android:key="video_quality"
+            android:title="Videoqualität auf dem Handy"
+            android:entries="@array/quality_entries"
+            android:entryValues="@array/quality_values"
+            android:defaultValue="auto"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            android:key="car_video_quality"
+            android:title="Video-Auflösung im Auto"
+            android:entries="@array/car_quality_entries"
+            android:entryValues="@array/car_quality_values"
+            android:defaultValue="auto"
+            android:summary="Standardqualität für den Head-Player"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            android:key="playback_speed"
+            android:title="Standard-Geschwindigkeit"
+            android:entries="@array/playback_speed_entries"
+            android:entryValues="@array/playback_speed_values"
+            android:defaultValue="1"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            android:key="playback_mode"
+            android:title="Standard-Wiedergabemodus"
+            android:entries="@array/playback_mode_entries"
+            android:entryValues="@array/playback_mode_values"
+            android:defaultValue="video"
+            android:summary="Video oder nur Audio (im Player umschaltbar)"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            android:key="video_backend"
+            android:title="Video-Backend (AA)"
+            android:entries="@array/backend_entries"
+            android:entryValues="@array/backend_values"
+            android:defaultValue="exoplayer"
+            android:summary="ExoPlayer ist performanter; WebView nur bei Bedarf manuell wählen" />
+        <ListPreference
+            android:key="car_video_surface"
+            android:title="AA Video-Oberfläche"
+            android:entries="@array/car_surface_entries"
+            android:entryValues="@array/car_surface_values"
+            android:defaultValue="surface"
+            android:summary="SurfaceView spart GPU/Copy-Arbeit; TextureView ist der Kompatibilitäts-Fallback"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat
+            android:key="require_parked"
+            android:title="Parkprüfung vor Video"
+            android:summary="Blockiert während der Fahrt; bei unbekanntem Parkstatus erscheint ein Sicherheitshinweis"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Audio-Standardwerte">
+        <ListPreference
+            android:key="audio_language"
+            android:title="Standard-Audiosprache"
+            android:entries="@array/audio_language_entries"
+            android:entryValues="@array/audio_language_values"
+            android:defaultValue="original"
+            app:useSimpleSummaryProvider="true" />
+        <ListPreference
+            android:key="audio_bitrate"
+            android:title="Standard-Audioqualität"
+            android:entries="@array/audio_bitrate_entries"
+            android:entryValues="@array/audio_bitrate_values"
+            android:defaultValue="auto"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Darstellung">
+        <SwitchPreferenceCompat
+            android:key="phone_browse_cards"
+            android:title="Companion-App als Karten"
+            android:summary="Aus: kompakte Liste · An: responsive Kartenansicht"
+            android:defaultValue="false" />
+        <SwitchPreferenceCompat
+            android:key="car_browse_cards"
+            android:title="Android Auto als Karten"
+            android:summary="Aus: kompakte Liste · An: je nach Display bis zu vier Spalten"
+            android:defaultValue="false" />
+        <ListPreference
+            android:key="thumbnail_quality"
+            android:title="Video-Bildauflösung"
+            android:entries="@array/thumbnail_quality_entries"
+            android:entryValues="@array/thumbnail_quality_values"
+            android:defaultValue="auto"
+            android:summary="Auflösung der Vorschaubilder in Startseite, Abos und Suche"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Daten">
+        <ListPreference
+            android:key="cache_size_mb"
+            android:title="Cache-Größe"
+            android:entries="@array/cache_entries"
+            android:entryValues="@array/cache_values"
+            android:defaultValue="@string/default_cache_size_mb"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat
+            android:key="history_enabled"
+            android:title="Verlauf speichern"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Diagnose">
+        <Preference
+            android:key="share_head_unit_logs"
+            android:title="Head-Unit-Logs teilen"
+            android:summary="Diagnose-ZIP mit den letzten Head-Unit-Ereignissen und Crash-Stacktraces erstellen" />
+        <Preference
+            android:key="clear_head_unit_logs"
+            android:title="Head-Unit-Logs löschen"
+            android:summary="Gespeicherte Diagnoseprotokolle entfernen" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

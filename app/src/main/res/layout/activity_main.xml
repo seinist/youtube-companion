@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="16dp" android:paddingEnd="4dp">
+        <ImageView android:layout_width="34dp" android:layout_height="34dp" android:contentDescription="@null" android:src="@drawable/ic_brand_play" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:text="@string/brand_youtube" android:textColor="?attr/colorOnSurface" android:textSize="20sp" android:textStyle="bold" />
+        <ImageButton android:id="@+id/searchBrowseButton" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/home_search_button" android:padding="12dp" android:src="@drawable/ic_search_yt" />
+        <ImageButton android:id="@+id/settingsButton" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/settings_title" android:padding="12dp" android:src="@drawable/ic_settings" />
+    </LinearLayout>
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:clipToPadding="false" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="24dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="16dp" android:paddingTop="12dp" android:paddingBottom="10dp">
+                <com.google.android.material.card.MaterialCardView android:layout_width="64dp" android:layout_height="64dp" app:cardBackgroundColor="@color/md_theme_surfaceContainerHigh" app:cardCornerRadius="32dp" app:cardElevation="0dp">
+                    <ImageView android:id="@+id/youtubeAccountAvatar" android:layout_width="match_parent" android:layout_height="match_parent" android:contentDescription="@null" android:padding="16dp" android:scaleType="centerCrop" android:src="@drawable/ic_person" />
+                </com.google.android.material.card.MaterialCardView>
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:id="@+id/youtubeAccountName" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="2" android:text="@string/nav_you" android:textColor="?attr/colorOnSurface" android:textSize="26sp" android:textStyle="bold" />
+                    <TextView android:id="@+id/youtubeSectionSubtitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="@string/home_youtube_anonymous" android:textColor="?attr/colorOnSurfaceVariant" android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+            <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:clipToPadding="false" android:paddingStart="16dp" android:paddingEnd="16dp" android:scrollbars="none">
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="8dp">
+                    <com.google.android.material.button.MaterialButton android:id="@+id/historyBrowseButton" style="@style/Widget.YouTubeAA.ActionChip" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/browse_tab_history" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/playlistBrowseButton" style="@style/Widget.YouTubeAA.ActionChip" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_marginStart="8dp" android:text="@string/browse_tab_playlist" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/popularBrowseButton" style="@style/Widget.YouTubeAA.ActionChip" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_marginStart="8dp" android:text="@string/browse_tab_popular" />
+                </LinearLayout>
+            </HorizontalScrollView>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="16dp" android:paddingTop="20dp" android:paddingEnd="16dp" android:paddingBottom="8dp" android:text="@string/home_quick_access" android:textColor="?attr/colorOnSurface" android:textSize="18sp" android:textStyle="bold" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/homeBrowseButton" style="@style/Widget.YouTubeAA.YouRow" android:layout_width="match_parent" android:layout_height="56dp" android:text="@string/browse_tab_home" app:icon="@drawable/ic_home" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/subscriptionsBrowseButton" style="@style/Widget.YouTubeAA.YouRow" android:layout_width="match_parent" android:layout_height="56dp" android:text="@string/browse_tab_subscriptions" android:visibility="gone" app:icon="@drawable/ic_subscriptions" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="16dp" android:paddingTop="24dp" android:paddingEnd="16dp" android:paddingBottom="8dp" android:text="@string/now_playing_title" android:textColor="?attr/colorOnSurface" android:textSize="18sp" android:textStyle="bold" />
+            <com.google.android.material.card.MaterialCardView android:id="@+id/nowPlayingCard" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginHorizontal="16dp" android:visibility="gone" app:cardBackgroundColor="@color/md_theme_surfaceContainerHigh" app:cardElevation="0dp" app:shapeAppearanceOverlay="@style/ShapeAppearance.YouTubeAA.Medium" app:strokeWidth="0dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="12dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                        <com.google.android.material.imageview.ShapeableImageView android:id="@+id/nowPlayingThumbnail" android:layout_width="128dp" android:layout_height="72dp" android:background="?attr/colorSurfaceVariant" android:contentDescription="@null" android:scaleType="centerCrop" app:shapeAppearanceOverlay="@style/ShapeAppearance.YouTubeAA.Thumb" />
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:id="@+id/nowPlayingTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="end" android:maxLines="2" android:textColor="?attr/colorOnSurface" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/nowPlayingChannel" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:ellipsize="end" android:maxLines="1" android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />
+                            <TextView android:id="@+id/nowPlayingStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:text="@string/now_playing_buffering" android:textColor="?attr/colorPrimary" android:textSize="12sp" android:visibility="gone" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <SeekBar android:id="@+id/nowPlayingSeekBar" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:max="1000" android:progressTint="?attr/colorPrimary" android:thumbTint="?attr/colorPrimary" />
+                    <LinearLayout android:id="@+id/nowPlayingControls" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal">
+                        <ImageButton android:id="@+id/nowPlayingPrevious" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/now_playing_previous" android:padding="12dp" android:src="@drawable/ic_skip_previous" />
+                        <ImageButton android:id="@+id/nowPlayingPlayPause" android:layout_width="52dp" android:layout_height="52dp" android:layout_marginHorizontal="16dp" android:background="@drawable/bg_play_circle" android:contentDescription="@string/now_playing_play" android:padding="13dp" android:src="@drawable/ic_pause_on_primary" />
+                        <ImageButton android:id="@+id/nowPlayingNext" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/now_playing_next" android:padding="12dp" android:src="@drawable/ic_skip_next" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <TextView android:id="@+id/nowPlayingEmptyText" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:paddingTop="8dp" android:text="@string/now_playing_empty" android:textColor="?attr/colorOnSurfaceVariant" android:textSize="13sp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+    <include layout="@layout/view_phone_bottom_nav" />
+</LinearLayout>

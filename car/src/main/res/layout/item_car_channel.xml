@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="96dp" android:layout_height="wrap_content"
+ android:orientation="vertical" android:gravity="center_horizontal" android:padding="8dp" android:background="@drawable/bg_car_button_quiet" android:focusable="true" android:clickable="true">
+ <ImageView android:id="@+id/car_channel_image" android:layout_width="64dp" android:layout_height="64dp" android:scaleType="centerCrop" android:background="@drawable/bg_car_avatar" android:clipToOutline="true" android:contentDescription="@null" />
+ <TextView android:id="@+id/car_channel_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:textColor="@color/car_on_surface" android:textSize="13sp" android:gravity="center" android:maxLines="1" android:ellipsize="end" />
+</LinearLayout>

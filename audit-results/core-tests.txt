@@ -1,0 +1,20 @@
+PASS aRetiredPhoneCannotOverwriteOrClearCarPlayback
+PASS explicitPhoneSelectionReplacesHeadUnit
+PASS nativeAudioCanOwnControlsWithoutAProjection
+PASS attachingThePhoneUiDoesNotPauseItsSharedEngine
+PASS aNewPhoneActivityDoesNotRestoreAnObsoleteController
+PASS playbackUpdatesPreserveMetadataAndExposeBuffering
+PASS clearRemovesPublishedState
+PASS Repeated delivery waits for actual readiness
+PASS Older callback for the same video cannot complete a newer cast
+PASS Timeout cancels target before invoking fallback once
+PASS Explicit cancellation never starts fallback later
+PASS Disconnect while preparing fails pending cast
+PASS Park rejection is immediate and leaves no pending cast
+PASS Blank media IDs never reach receiver
+PASS Missing receiver and missing launch context invokes fallback
+PASS Active account name takes precedence over other account rows
+PASS Selected account handles runs and protocol-relative avatar
+PASS Unselected accounts and arbitrary channel names are not the signed-in user
+PASS Legacy placeholder is missing data, not a username
+19 scenarios passed (platform doubles; no Android runtime)

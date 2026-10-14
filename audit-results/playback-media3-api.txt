@@ -1,0 +1,3 @@
+Isolated compile of CarLipSync.kt, CarRenderersFactory.kt, PlaybackDiagnostics.kt and PlayerFactory.kt against official Media3 1.11.1 class JARs, AndroidX annotations and Guava. Android framework signatures from android-4.1.1.4.jar. Logging and bridge collaborators replaced by explicit test doubles. Kotlin compiler: 2.4.0-dev-6891. Not an Android/Gradle build or runtime test.
+
+Exit code: 0

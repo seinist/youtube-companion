@@ -1,0 +1,7 @@
+Static checks passed: 58 Kotlin files parsed; 93 XML files parsed.
+New feed action string names exist in both modules; no duplicate string names.
+Phone subscription freshness is copied from the fetched result, not reset on rendering.
+Cached subscription tab restoration invokes the staleness check.
+git diff --check: clean.
+These checks do not compile Android resources or run either UI.
+Full Android build remains unavailable; see lip-sync-build-attempt.txt.

@@ -1,0 +1,64 @@
+/tmp/youtube-aa-core-9xwly_zd/Loop.kt:7:15: warning: parameter 'looper' is never used
+class Handler(looper: Looper) {
+              ^
+/tmp/youtube-aa-core-9xwly_zd/Loop.kt:9:39: warning: parameter 'delay' is never used
+    fun postDelayed(action: Runnable, delay: Long): Boolean { pending += action; return true }
+                                      ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:5:9: warning: parameter 'context' is never used
+        context: android.content.Context,
+        ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:6:9: warning: parameter 'bringToFront' is never used
+        bringToFront: Boolean = false,
+        ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:11:15: warning: parameter 'tag' is never used
+    fun event(tag: String, message: String) = Unit
+              ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:11:28: warning: parameter 'message' is never used
+    fun event(tag: String, message: String) = Unit
+                           ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:12:17: warning: parameter 'tag' is never used
+    fun warning(tag: String, message: String) = Unit
+                ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:12:30: warning: parameter 'message' is never used
+    fun warning(tag: String, message: String) = Unit
+                             ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:13:15: warning: parameter 'tag' is never used
+    fun error(tag: String, message: String, throwable: Throwable? = null) = Unit
+              ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:13:28: warning: parameter 'message' is never used
+    fun error(tag: String, message: String, throwable: Throwable? = null) = Unit
+                           ^
+/tmp/youtube-aa-core-9xwly_zd/Projection.kt:13:45: warning: parameter 'throwable' is never used
+    fun error(tag: String, message: String, throwable: Throwable? = null) = Unit
+                                            ^
+PASS projectedHeadUnitRejectsStaleMediaSessionStop
+PASS aRetiredPhoneCannotOverwriteOrClearCarPlayback
+PASS explicitPhoneSelectionReplacesHeadUnit
+PASS nativeAudioCanOwnControlsWithoutAProjection
+PASS attachingThePhoneUiDoesNotPauseItsSharedEngine
+PASS aNewPhoneActivityDoesNotRestoreAnObsoleteController
+PASS explicitPauseDuringFocusSuppressionPublishesChangedIntent
+PASS playbackUpdatesPreserveMetadataAndExposeBuffering
+PASS clearRemovesPublishedState
+PASS disabledAndDefaultDoNotShiftVideo
+PASS positiveMakesAudioLaterByAdvancingPicture
+PASS wallClockDelayIsConstantAcrossPlaybackSpeeds
+PASS switchingModesRestoresSavedValueWithoutCumulativeDrift
+PASS outOfRangeValuesAreClampedWithoutIntegerOverflow
+PASS seekUsesNewPositionAndPlayerInstancesStayIndependent
+PASS tenMinutesOfPositionTicksDoNotRepublishArtwork
+PASS realMetadataAndArtworkUpdatesStillReachTheNotification
+PASS transientPauseUserPauseResumeAndServiceRestartAreDistinct
+PASS Repeated delivery waits for actual readiness
+PASS Duplicate cast for the same video joins the existing request
+PASS Timeout cancels target before invoking fallback once
+PASS Explicit cancellation never starts fallback later
+PASS Disconnect while preparing fails pending cast
+PASS Park rejection is immediate and leaves no pending cast
+PASS Blank media IDs never reach receiver
+PASS Missing receiver and missing launch context invokes fallback
+PASS Active account name takes precedence over other account rows
+PASS Selected account handles runs and protocol-relative avatar
+PASS Unselected accounts and arbitrary channel names are not the signed-in user
+PASS Legacy placeholder is missing data, not a username
+30 scenarios passed (platform doubles; no Android runtime)

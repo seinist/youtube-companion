@@ -1,0 +1,5 @@
+PASS Kotlin syntax: 54 files.
+PASS XML parse: 93 files.
+PASS Python harness AST.
+PASS git diff --check.
+Not an Android build, Lint, R8 or device performance test.

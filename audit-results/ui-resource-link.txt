@@ -1,0 +1,6 @@
+AAPT2 9.4.0-15978811 compile + resource link: PASS
+AAPT2 resource link exit 0 dependency resource packs 94
+
+Framework resources: org.robolectric android-all 17-robolectric-15733970 (API 37).
+Manifest used for this isolated link declares application theme/minSdk 28/targetSdk 37; it is not the production manifest build.
+No layout inflation, screenshot, device or runtime measurement.

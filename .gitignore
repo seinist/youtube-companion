@@ -1,0 +1,22 @@
+# Build-Ausgaben
+*.iml
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+dist/
+
+# Signing (Uni-Projekt-Keystore, siehe docs/DOCUMENTATION.de.md)
+keystore.properties
+keystore/*.jks
+*.jks
+release.jks
+
+# IDE
+.idea/
+*.hprof
+
+# Claude Code lokaler Tool-State
+.claude/

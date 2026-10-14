@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="icon_background">#101013</color>
+
+    <color name="car_primary">#FF0033</color>
+    <color name="car_on_primary">#FFFFFF</color>
+    <color name="car_surface">#0F0F0F</color>
+    <color name="car_surface_container">#181818</color>
+    <color name="car_surface_high">#272727</color>
+    <color name="car_surface_variant">#242424</color>
+    <color name="car_on_surface">#F2F2F2</color>
+    <color name="car_on_surface_variant">#AAAAAA</color>
+    <color name="car_outline">#3D3D3D</color>
+    <color name="car_scrim">#CC000000</color>
+    <color name="car_warning_bg">#2A1A1A</color>
+</resources>

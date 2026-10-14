@@ -1,0 +1,139 @@
+<resources>
+    <string name="app_name">YouTube Companion</string>
+    <string name="tv_login_title">YouTube verknüpfen</string>
+    <string name="tv_login_intro">Persönliche Abos ohne Google-Cloud-Console: Melde dich mit dem Gerätecode an. Suche, Trends und Wiedergabe laufen weiter anonym (NewPipe-Stil).</string>
+    <string name="tv_login_start">Code anfordern</string>
+    <string name="tv_login_open">Anmeldeseite öffnen</string>
+    <string name="tv_login_copy">Code kopieren</string>
+    <string name="tv_login_skip">Später / anonym weiter</string>
+    <string name="tv_login_risk">Hinweis: Nutzt den öffentlichen YouTube-TV-Login (inoffiziell). Google kann den Zugang jederzeit einschränken.</string>
+    <string name="browse_link_account">YouTube verknüpfen</string>
+    <string name="browse_search_placeholder">Videos, Kanäle, Themen…</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_account_connected">Verknüpft als %1$s · antippen zum Trennen</string>
+    <string name="settings_account_disconnected">Nicht verknüpft · antippen zum Anmelden</string>
+    <string name="settings_account_disconnect_title">YouTube-Verknüpfung trennen?</string>
+    <string name="settings_account_disconnect_message">Persönliche Empfehlungen und Abos sind danach nicht mehr verfügbar, bis du dich erneut anmeldest.</string>
+    <string name="settings_account_disconnect">Trennen</string>
+    <string name="home_youtube_personalized">Deine Startseite und Abos sind verfügbar.</string>
+    <string name="home_youtube_anonymous">Öffentliche Empfehlungen und Suche. Die Anmeldung findest du in den Einstellungen.</string>
+    <string name="home_search_button">YouTube suchen</string>
+    <string name="status_hybrid_fallback_label">YouTube-Konto</string>
+    <!-- Als @string referenziert, damit AAPT den Wert nicht fälschlich als Integer kompiliert
+         (ListPreference.getValue() erwartet zwingend einen String; ein roh-numerischer
+         android:defaultValue führt sonst zu NPE in ListPreference.findIndexOfValue()). -->
+    <string name="default_cache_size_mb" translatable="false">100</string>
+
+    <string name="now_playing_title">Auf dem Auto-Display</string>
+    <string name="now_playing_empty">Gerade wird nichts auf dem Auto-Display abgespielt.</string>
+    <string name="now_playing_play">Abspielen</string>
+    <string name="now_playing_pause">Pause</string>
+    <string name="now_playing_next">Nächstes Video</string>
+    <string name="now_playing_previous">Vorheriges Video</string>
+    <string name="mini_player_close">Wiedergabe stoppen</string>
+
+    <string name="browse_youtube_title">YouTube</string>
+    <string name="browse_search_action">Suchen</string>
+    <string name="browse_loading">Laden …</string>
+    <string name="browse_empty">Keine Ergebnisse</string>
+    <string name="browse_not_logged_in">Bitte zuerst anmelden, um YouTube zu durchsuchen.</string>
+    <string name="browse_error">Laden fehlgeschlagen</string>
+    <string name="browse_back">Zurück</string>
+    <string name="browse_tab_home">Startseite</string>
+    <string name="browse_tab_subscriptions">Abos</string>
+    <string name="browse_tab_shorts">Shorts</string>
+    <string name="browse_subscriptions_latest">Neueste Videos</string>
+    <string name="browse_tab_history">Verlauf</string>
+    <string name="browse_tab_popular">Beliebt</string>
+    <string name="browse_tab_playlist">Playlist</string>
+    <string name="browse_playlist_add">Playlist</string>
+    <string name="browse_more_actions">Weitere Aktionen</string>
+    <string name="browse_menu_watch_phone">Auf dem Handy ansehen</string>
+    <string name="browse_menu_cast_car">Auf Auto-Display abspielen</string>
+    <string name="browse_menu_add_playlist">Zur Playlist hinzufügen</string>
+    <string name="browse_menu_remove_playlist">Aus Playlist entfernen</string>
+    <string name="browse_menu_share">Teilen</string>
+    <string name="browse_menu_copy_link">Link kopieren</string>
+    <string name="browse_menu_open_browser">In YouTube öffnen</string>
+    <string name="browse_link_copied">Link kopiert</string>
+    <string name="browse_playlist_added">Zur Playlist hinzugefügt</string>
+    <string name="browse_playlist_already">Bereits in der Playlist</string>
+    <string name="browse_playlist_removed">Aus Playlist entfernt</string>
+    <string name="browse_playlist_empty">Playlist ist leer</string>
+    <string name="browse_playlist_play_all">Playlist abspielen</string>
+    <string name="browse_playlist_clear">Playlist leeren</string>
+    <string name="browse_playlist_cast_all">Playlist auf Auto</string>
+    <string name="browse_history_disabled">Verlauf ist in den Einstellungen deaktiviert.</string>
+    <string name="browse_cast_queued">Video vorgemerkt – die Auto-App „YouTube Video“ wird gestartet (falls Android Auto das zulässt)</string>
+    <string name="browse_cast_park_blocked">Wiedergabe blockiert: Das Fahrzeug muss stehen beziehungsweise der Parkhinweis muss bestätigt sein.</string>
+    <string name="browse_cast_unavailable">Auf dem Auto-Display nicht möglich – Android Auto ist nicht verbunden oder der Parkhinweis wurde dort noch nicht bestätigt</string>
+
+    <string name="video_player_error">Video-Stream konnte nicht geladen werden</string>
+    <string name="video_player_open_browser">Im Browser öffnen</string>
+    <string name="video_player_cast_button">Auf Auto-Display</string>
+    <string name="player_switch_to_video">Zum Video</string>
+    <string name="player_switch_to_audio">Nur Audio</string>
+    <string name="player_settings">Einstellungen</string>
+    <string name="player_setting_speed">Geschwindigkeit · %1$s</string>
+    <string name="player_setting_quality">Qualität · %1$s</string>
+    <string name="player_setting_audio">Audiospur · %1$s</string>
+    <string name="player_setting_audio_quality">Audioqualität · %1$s</string>
+    <string name="player_setting_cache">Cache · %1$s</string>
+    <string name="player_cache_title">Cache-Größe</string>
+    <string name="player_speed_title">Wiedergabegeschwindigkeit</string>
+    <string name="player_quality_title">Videoqualität</string>
+    <string name="player_audio_track_title">Audiospur</string>
+    <string name="player_audio_quality_title">Audioqualität</string>
+    <string name="player_quality_auto">Auto (empfohlen)</string>
+    <string name="player_quality_low">Niedrig</string>
+    <string name="player_audio_auto">Auto (Originalspur)</string>
+    <string name="player_audio_device">Gerätesprache</string>
+    <string name="player_audio_original">Original</string>
+    <string name="player_audio_german">Deutsch</string>
+    <string name="player_audio_english">Englisch</string>
+    <string name="player_audio_quality_auto">Auto (beste verfügbare)</string>
+    <string name="player_audio_quality_high">Hoch</string>
+    <string name="player_audio_quality_medium">Mittel</string>
+    <string name="player_audio_quality_low">Niedrig</string>
+    <string name="browse_state_empty_title">Noch nichts hier</string>
+    <string name="browse_state_empty_message">Für diesen Bereich wurden gerade keine Inhalte gefunden.</string>
+    <string name="browse_state_error_title">Konnte nicht geladen werden</string>
+    <string name="browse_retry">Erneut versuchen</string>
+    <string name="browse_open_settings">Einstellungen öffnen</string>
+    <string name="browse_search_videos">Videos suchen</string>
+    <string name="browse_sign_in_action">Konto verknüpfen</string>
+    <string name="now_playing_buffering">Puffert …</string>
+    <string name="player_stop_and_return">Wiedergabe stoppen und zurück</string>
+
+    <string name="nav_you">Du</string>
+    <string name="home_quick_access">Schnellzugriff</string>
+    <string name="browse_search_toggle">Suchen</string>
+    <string name="player_fullscreen">Vollbild</string>
+    <string name="player_retrying">Wiedergabe wird neu verbunden …</string>
+    <string name="player_share">Teilen</string>
+    <string name="player_related_videos">Ähnliche Videos</string>
+    <string name="brand_youtube" translatable="false">YouTube</string>
+    <string name="time_zero" translatable="false">0:00</string>
+    <string name="time_separator" translatable="false"> / </string>
+    <string name="device_code_placeholder" translatable="false">————</string>
+    <string name="device_url_placeholder" translatable="false">https://www.google.com/device</string>
+    <string name="login_status_ready">Login → Google-Konto → YouTube zulassen</string>
+    <string name="tv_login_already_linked">Bereits verknüpft. Du kannst Abos und den Feed laden oder dich auf der Startseite abmelden.</string>
+    <string name="tv_login_preparing">Client und Code werden vorbereitet …</string>
+    <string name="tv_login_instructions">1) Code ist bereits kopiert\n2) Bei Google anmelden\n3) Code einfügen (%1$s)\n4) Hier warten …</string>
+    <string name="tv_login_poll_status">Code %1$s\nURL: %2$s\n%3$s</string>
+    <string name="tv_login_session_unreadable">Token gespeichert, aber die Sitzung ist nicht lesbar – bitte die App neu starten.</string>
+    <string name="tv_login_success">Verknüpfung erfolgreich.</string>
+    <string name="tv_login_error">Fehler: %1$s</string>
+    <string name="player_fast_forward">Vorspulen</string>
+    <string name="player_rewind">Zurückspulen</string>
+    <string name="player_play_pause">Wiedergabe/Pause</string>
+    <string name="account_name_loading">Kontoname wird geladen…</string>
+    <string name="account_name_unavailable">YouTube-Konto · Erneut laden</string>
+    <string name="browse_feed_more">Weitere Videos laden</string>
+    <string name="browse_feed_retry">Feed unvollständig – erneut laden</string>
+    <string name="browse_for_you">Für dich</string>
+    <string name="browse_discover">Entdecken</string>
+    <string name="browse_show_cards">Karten anzeigen</string>
+    <string name="browse_show_list">Liste anzeigen</string>
+</resources>

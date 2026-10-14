@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="82dp" android:layout_height="wrap_content"
+    android:orientation="vertical" android:gravity="center_horizontal"
+    android:padding="5dp" android:clickable="true" android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/channel_thumbnail" android:layout_width="56dp" android:layout_height="56dp"
+        android:scaleType="centerCrop" android:src="@drawable/ic_person" android:contentDescription="@null"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.YouTubeAA.Circle" />
+    <TextView android:id="@+id/channel_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="5dp" android:gravity="center" android:maxLines="1" android:ellipsize="end"
+        android:textSize="11sp" android:textColor="?attr/colorOnSurface" />
+</LinearLayout>

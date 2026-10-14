@@ -1,0 +1,5 @@
+Kotlin syntax: 60 production files PASS
+XML syntax: 119 files PASS
+git diff --check: PASS
+Automatic head-unit handoff still uses startPaused=false.
+No generated build output or audit toolchain is included in the source ZIP.

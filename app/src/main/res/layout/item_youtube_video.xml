@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginHorizontal="12dp" android:layout_marginBottom="8dp"
+    android:clickable="true" android:focusable="true" app:cardBackgroundColor="?attr/colorSurface"
+    app:cardCornerRadius="12dp" app:cardElevation="0dp" app:rippleColor="?attr/colorSurfaceVariant" app:strokeWidth="0dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:orientation="horizontal" android:padding="8dp">
+        <com.google.android.material.imageview.ShapeableImageView android:id="@+id/video_thumbnail"
+            android:layout_width="128dp" android:layout_height="72dp" android:background="?attr/colorSurfaceVariant"
+            android:contentDescription="@null" android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.YouTubeAA.Thumb" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp"
+            android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/video_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:ellipsize="end" android:fontFamily="sans-serif-medium" android:maxLines="2"
+                android:textColor="?attr/colorOnSurface" android:textSize="15sp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                android:gravity="center_vertical" android:orientation="horizontal">
+                <com.google.android.material.imageview.ShapeableImageView android:id="@+id/video_channel_avatar"
+                    android:layout_width="18dp" android:layout_height="18dp" android:layout_marginEnd="6dp"
+                    android:background="?attr/colorSurfaceVariant" android:contentDescription="@null" android:scaleType="centerCrop"
+                    android:src="@drawable/ic_person" app:shapeAppearanceOverlay="@style/ShapeAppearance.YouTubeAA.Circle" />
+                <TextView android:id="@+id/video_channel" android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:ellipsize="end" android:maxLines="1"
+                    android:textColor="?attr/colorOnSurfaceVariant" android:textSize="13sp" />
+            </LinearLayout>
+        </LinearLayout>
+        <ImageButton android:id="@+id/video_more_button" android:layout_width="40dp" android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless" android:clickable="true"
+            android:contentDescription="@string/browse_more_actions" android:focusable="true" android:padding="8dp"
+            android:src="@drawable/ic_more_vert" app:tint="?attr/colorOnSurface" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

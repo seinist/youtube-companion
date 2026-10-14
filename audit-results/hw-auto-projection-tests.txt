@@ -1,0 +1,6 @@
+PASS default-30
+PASS host-max-25
+PASS dynamic-20
+PASS min-host-wins
+PASS focus-propagates
+5 scenarios passed

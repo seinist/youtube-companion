@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <WebView
+        android:id="@+id/web_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_gravity="top"
+        android:background="@drawable/bg_car_top_scrim" />
+
+    <Button
+        android:id="@+id/webview_back"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="top|start"
+        android:layout_margin="14dp"
+        android:background="@drawable/bg_car_button"
+        android:minWidth="88dp"
+        android:paddingHorizontal="16dp"
+        android:text="@string/browse_back"
+        android:textAllCaps="false"
+        android:textColor="@color/car_on_surface" />
+
+    <TextView
+        android:id="@+id/webview_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_car_button"
+        android:padding="16dp"
+        android:textColor="@color/car_on_surface"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+</FrameLayout>

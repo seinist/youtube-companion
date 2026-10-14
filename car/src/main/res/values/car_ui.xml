@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <dimen name="car_touch_size">56dp</dimen>
+    <dimen name="car_play_size">72dp</dimen>
+    <dimen name="car_toolbar_height">64dp</dimen>
+    <dimen name="car_page_padding">16dp</dimen>
+    <dimen name="car_control_gap">16dp</dimen>
+    <dimen name="car_corner_radius">18dp</dimen>
+    <style name="Widget.YouTubeCar.IconButton" parent="">
+        <item name="android:layout_width">@dimen/car_touch_size</item>
+        <item name="android:layout_height">@dimen/car_touch_size</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:padding">14dp</item>
+        <item name="android:background">@drawable/bg_car_button</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:tint">@color/car_control_tint</item>
+        <item name="android:focusable">true</item>
+        <item name="android:scaleType">centerInside</item>
+    </style>
+    <style name="Widget.YouTubeCar.ToolbarButton" parent="Widget.YouTubeCar.IconButton">
+        <item name="android:background">@drawable/bg_car_button_quiet</item>
+    </style>
+    <style name="Widget.YouTubeCar.PlayButton" parent="Widget.YouTubeCar.IconButton">
+        <item name="android:layout_width">@dimen/car_play_size</item>
+        <item name="android:layout_height">@dimen/car_play_size</item>
+        <item name="android:background">@drawable/bg_car_player_transport</item>
+        <item name="android:tint">@color/car_on_primary</item>
+        <item name="android:padding">18dp</item>
+    </style>
+    <!-- Audio/video mode switch next to play: same round look and size as play. -->
+    <style name="Widget.YouTubeCar.ModeButton" parent="Widget.YouTubeCar.PlayButton" />
+    <style name="Widget.YouTubeCar.TextButton" parent="android:style/Widget.Material.Button.Borderless">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">64dp</item>
+        <item name="android:background">@drawable/bg_car_button</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="android:textColor">@color/car_control_tint</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingHorizontal">18dp</item>
+        <item name="android:paddingVertical">8dp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="Widget.YouTubeCar.ToolbarTitle" parent="">
+        <item name="android:textColor">@color/car_on_surface</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+</resources>

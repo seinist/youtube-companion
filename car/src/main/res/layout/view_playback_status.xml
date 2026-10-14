@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/playback_status_card" android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_gravity="top|center_horizontal" android:layout_marginTop="76dp" android:layout_marginHorizontal="12dp"
+    android:orientation="vertical" android:gravity="center" android:background="@drawable/bg_car_button"
+    android:paddingHorizontal="12dp" android:paddingVertical="4dp" android:visibility="gone"
+    android:accessibilityLiveRegion="polite">
+    <ProgressBar android:id="@+id/playback_status_progress" style="?android:attr/progressBarStyleSmall"
+        android:layout_width="24dp" android:layout_height="24dp" android:layout_marginBottom="4dp" android:indeterminateTint="@color/car_on_surface" />
+    <TextView android:id="@+id/playback_status_label" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:maxWidth="240dp" android:maxLines="2" android:ellipsize="end" android:textColor="@color/car_on_surface" android:textSize="14sp" />
+    <Button android:id="@+id/playback_status_retry" style="@style/Widget.YouTubeCar.TextButton"
+        android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+        android:text="@string/playback_status_retry" android:visibility="gone" />
+</LinearLayout>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@android:color/black">
+ <androidx.media3.ui.PlayerView android:id="@+id/player_view" android:layout_width="match_parent" android:layout_height="match_parent" app:controller_layout_id="@layout/view_car_player_controls" app:show_buffering="never" app:surface_type="texture_view" app:use_controller="true" />
+ <FrameLayout android:id="@+id/audio_player_panel" android:layout_width="match_parent" android:layout_height="match_parent" android:visibility="gone">
+  <ImageView android:id="@+id/audio_art" android:layout_width="match_parent" android:layout_height="match_parent" android:contentDescription="@null" android:scaleType="centerCrop" />
+  <View android:layout_width="match_parent" android:layout_height="match_parent" android:background="#D9000000" />
+  <LinearLayout android:id="@+id/audio_content" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginTop="68dp" android:layout_marginHorizontal="16dp" android:layout_marginBottom="8dp" android:orientation="horizontal" android:gravity="center_vertical">
+   <ImageView android:id="@+id/audio_art_foreground" android:layout_width="144dp" android:layout_height="144dp" android:layout_marginEnd="16dp" android:background="@drawable/bg_car_cover" android:clipToOutline="true" android:contentDescription="@null" android:scaleType="centerCrop" />
+   <ScrollView android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:fillViewport="true" android:scrollbars="none">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_vertical">
+     <TextView android:id="@+id/audio_title" style="@style/Widget.YouTubeCar.ToolbarTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="2" android:textSize="22sp" />
+     <TextView android:id="@+id/audio_channel" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end" android:textColor="@color/car_on_surface_variant" android:textSize="14sp" android:layout_marginTop="4dp" />
+     <androidx.media3.ui.DefaultTimeBar android:id="@+id/audio_seek" android:layout_width="match_parent" android:layout_height="48dp" app:bar_height="5dp" app:played_color="@color/car_primary" app:buffered_color="#66FFFFFF" app:unplayed_color="#33FFFFFF" app:scrubber_color="@color/car_primary" app:scrubber_enabled_size="14dp" app:scrubber_dragged_size="22dp" app:touch_target_height="48dp" />
+     <LinearLayout android:layout_width="match_parent" android:layout_height="20dp" android:orientation="horizontal">
+      <TextView android:id="@+id/audio_position" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/time_zero" android:textColor="@color/car_on_surface_variant" android:textSize="13sp" />
+      <TextView android:id="@+id/audio_duration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/time_zero" android:textColor="@color/car_on_surface_variant" android:textSize="13sp" />
+     </LinearLayout>
+     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center" android:layout_marginTop="4dp">
+      <ImageButton android:id="@+id/audio_prev" style="@style/Widget.YouTubeCar.IconButton" android:src="@drawable/ic_skip_previous" android:contentDescription="@string/player_previous" />
+      <ImageButton android:id="@+id/audio_play_pause" style="@style/Widget.YouTubeCar.PlayButton" android:layout_marginHorizontal="16dp" android:src="@drawable/ic_pause_on_primary" android:contentDescription="@string/player_play_pause" />
+      <ImageButton android:id="@+id/audio_switch_video" style="@style/Widget.YouTubeCar.ModeButton" android:layout_marginEnd="16dp" android:src="@drawable/ic_video" android:contentDescription="@string/player_switch_to_video" />
+      <ImageButton android:id="@+id/audio_next" style="@style/Widget.YouTubeCar.IconButton" android:src="@drawable/ic_skip_next" android:contentDescription="@string/player_next" />
+     </LinearLayout>
+    </LinearLayout>
+   </ScrollView>
+  </LinearLayout>
+  <LinearLayout android:id="@+id/audio_toolbar" android:layout_width="match_parent" android:layout_height="@dimen/car_toolbar_height" android:layout_gravity="top" android:background="@drawable/bg_gradient_top" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="8dp">
+ <ImageButton android:id="@+id/audio_back" style="@style/Widget.YouTubeCar.ToolbarButton" android:src="@drawable/ic_arrow_back" android:contentDescription="@string/browse_back" />
+ <TextView android:id="@+id/audio_toolbar_title" style="@style/Widget.YouTubeCar.ToolbarTitle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="8dp" android:text="@string/player_mode_audio" />
+ <ImageButton android:id="@+id/audio_settings" style="@style/Widget.YouTubeCar.ToolbarButton" android:src="@drawable/ic_settings" android:contentDescription="@string/player_settings" />
+ </LinearLayout>
+ </FrameLayout>
+ <include layout="@layout/view_playback_status" />
+ <TextView android:id="@+id/status_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:padding="16dp" android:background="@drawable/bg_car_row" android:textColor="@color/car_on_surface" android:textSize="16sp" android:visibility="gone" />
+     <!--
+        In-player settings sheet for Android Auto projection. This deliberately lives in the
+        fragment hierarchy instead of PopupMenu/AlertDialog windows: CarActivity is hosted by
+        Android Auto and transient platform windows can lose focus/touch routing there.
+    -->
+    <FrameLayout
+        android:id="@+id/player_settings_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/player_settings_panel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:background="@color/car_surface"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/player_settings_back"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_car_button_quiet"
+                    android:contentDescription="@string/browse_back"
+                    android:padding="14dp"
+                    android:src="@drawable/ic_arrow_back"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/player_settings_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/player_settings"
+                    android:textColor="@color/car_on_surface"
+                    android:textSize="21sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/player_settings_close"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_car_button_quiet"
+                    android:contentDescription="@android:string/cancel"
+                    android:padding="14dp"
+                    android:src="@drawable/ic_close" />
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fillViewport="true">
+
+                <LinearLayout
+                    android:id="@+id/player_settings_rows"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="24dp" />
+            </ScrollView>
+        </LinearLayout>
+    </FrameLayout>
+
+
+</FrameLayout>

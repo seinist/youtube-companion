@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:orientation="horizontal" android:paddingStart="16dp" android:paddingEnd="4dp">
+        <ImageView android:layout_width="34dp" android:layout_height="34dp" android:contentDescription="@null" android:src="@drawable/ic_brand_play" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:layout_weight="1" android:text="@string/brand_youtube" android:textColor="?attr/colorOnSurface" android:textSize="20sp" android:textStyle="bold" />
+        <ImageButton android:id="@+id/browse_layout_toggle" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/browse_show_cards" android:padding="12dp" android:src="@drawable/ic_view_grid" />
+        <ImageButton android:id="@+id/browse_search_toggle" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/browse_search_toggle" android:padding="12dp" android:src="@drawable/ic_search_yt" />
+        <ImageButton android:id="@+id/browse_settings_button" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/settings_title" android:padding="12dp" android:src="@drawable/ic_settings" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/search_panel" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingBottom="8dp" android:visibility="gone">
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="@string/browse_search_placeholder" app:boxBackgroundMode="filled" app:boxCornerRadiusBottomEnd="24dp" app:boxCornerRadiusBottomStart="24dp" app:boxCornerRadiusTopEnd="24dp" app:boxCornerRadiusTopStart="24dp" app:boxStrokeWidth="0dp" app:boxStrokeWidthFocused="0dp" app:endIconMode="clear_text" app:startIconDrawable="@drawable/ic_search_yt">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/search_input" android:layout_width="match_parent" android:layout_height="52dp" android:imeOptions="actionSearch" android:inputType="text" android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/search_button" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="52dp" android:layout_marginStart="4dp" android:text="@string/browse_search_action" android:textAllCaps="false" />
+    </LinearLayout>
+    <HorizontalScrollView android:id="@+id/browse_tabs_scroll" android:layout_width="match_parent" android:layout_height="wrap_content" android:clipToPadding="false" android:paddingStart="12dp" android:paddingEnd="12dp" android:scrollbars="none">
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="4dp" android:paddingBottom="8dp">
+            <com.google.android.material.button.MaterialButton android:id="@+id/tab_home" style="@style/Widget.YouTubeAA.TabChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:text="@string/browse_for_you" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/tab_subscriptions" style="@style/Widget.YouTubeAA.TabChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:text="@string/browse_tab_subscriptions" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/tab_popular" style="@style/Widget.YouTubeAA.TabChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:text="@string/browse_discover" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/tab_history" style="@style/Widget.YouTubeAA.TabChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="8dp" android:text="@string/browse_tab_history" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/tab_playlist" style="@style/Widget.YouTubeAA.TabChip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/browse_tab_playlist" />
+        </LinearLayout>
+    </HorizontalScrollView>
+    <LinearLayout android:id="@+id/browse_header_row" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="12dp" android:visibility="gone">
+        <com.google.android.material.button.MaterialButton android:id="@+id/browse_back_button" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/browse_back" android:textAllCaps="false" />
+        <TextView android:id="@+id/browse_header_title" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="4dp" android:layout_weight="1" android:ellipsize="end" android:maxLines="1" android:textAppearance="?attr/textAppearanceTitleMedium" android:textColor="?attr/colorOnSurface" />
+    </LinearLayout>
+    <TextView android:id="@+id/browse_status_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:paddingTop="4dp" android:textAppearance="?attr/textAppearanceBodySmall" android:textColor="?attr/colorOnSurfaceVariant" android:visibility="gone" />
+    <com.google.android.material.card.MaterialCardView android:id="@+id/browse_state_card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginHorizontal="16dp" android:layout_marginTop="8dp" android:layout_marginBottom="8dp" android:visibility="gone" app:cardBackgroundColor="@color/md_theme_surfaceContainer" app:cardElevation="0dp" app:shapeAppearanceOverlay="@style/ShapeAppearance.YouTubeAA.Medium" app:strokeWidth="0dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical" android:padding="24dp">
+            <ProgressBar android:id="@+id/browse_state_progress" android:layout_width="32dp" android:layout_height="32dp" android:indeterminateTint="?attr/colorPrimary" android:visibility="gone" />
+            <TextView android:id="@+id/browse_state_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:textAppearance="?attr/textAppearanceTitleMedium" android:textColor="?attr/colorOnSurface" />
+            <TextView android:id="@+id/browse_state_message" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:gravity="center" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?attr/colorOnSurfaceVariant" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/browse_state_action" style="@style/Widget.Material3.Button.TonalButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:textAllCaps="false" android:visibility="gone" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+    <FrameLayout android:id="@+id/browse_pager_stage" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:clipChildren="true" android:background="?attr/colorSurface">
+        <androidx.core.widget.NestedScrollView android:id="@+id/browse_prev_page" android:layout_width="match_parent" android:layout_height="match_parent" android:clipToPadding="false" android:fillViewport="true" android:paddingBottom="8dp" android:visibility="invisible" android:background="?attr/colorSurface">
+            <LinearLayout android:id="@+id/browse_prev_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+        </androidx.core.widget.NestedScrollView>
+        <androidx.core.widget.NestedScrollView android:id="@+id/browse_next_page" android:layout_width="match_parent" android:layout_height="match_parent" android:clipToPadding="false" android:fillViewport="true" android:paddingBottom="8dp" android:visibility="invisible" android:background="?attr/colorSurface">
+            <LinearLayout android:id="@+id/browse_next_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+        </androidx.core.widget.NestedScrollView>
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:id="@+id/browse_swipe_refresh" android:layout_width="match_parent" android:layout_height="match_parent" android:background="?attr/colorSurface">
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/browse_results_scroll" android:layout_width="match_parent" android:layout_height="match_parent" android:clipToPadding="false" android:paddingBottom="8dp" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </FrameLayout>
+    <include layout="@layout/view_mini_player" />
+    <include layout="@layout/view_phone_bottom_nav" />
+</LinearLayout>

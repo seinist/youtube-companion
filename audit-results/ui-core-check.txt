@@ -1,0 +1,7 @@
+PASS Projected layouts fit low, wide and portrait viewports; controls stay at least 48dp
+PASS Decoded artwork stays inside a bounded size class, including 8K images
+PASS Automatic thumbnails prioritize small transfers; explicit high quality and custom URLs survive
+PASS Async HTTP preserves status and complete response body
+PASS Oversized responses fail before entering the bitmap/JSON cache
+PASS Leaving a view cancels the underlying OkHttp call and rejects late success
+6 UI/core scenarios passed (no Android runtime)

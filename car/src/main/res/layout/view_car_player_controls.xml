@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+ <LinearLayout android:id="@+id/video_toolbar" android:layout_width="match_parent" android:layout_height="@dimen/car_toolbar_height" android:layout_gravity="top" android:background="@drawable/bg_gradient_top" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="8dp">
+ <ImageButton android:id="@+id/player_overlay_back" style="@style/Widget.YouTubeCar.ToolbarButton" android:src="@drawable/ic_arrow_back" android:contentDescription="@string/browse_back" />
+ <TextView android:id="@+id/player_overlay_title" style="@style/Widget.YouTubeCar.ToolbarTitle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginHorizontal="8dp"  />
+ <ImageButton android:id="@+id/player_overlay_settings" style="@style/Widget.YouTubeCar.ToolbarButton" android:src="@drawable/ic_settings" android:contentDescription="@string/player_settings" />
+ </LinearLayout>
+ <LinearLayout android:id="@+id/video_transport" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:gravity="center_vertical" android:orientation="horizontal">
+  <ImageButton android:id="@id/exo_rew" style="@style/Widget.YouTubeCar.IconButton" android:src="@drawable/ic_replay_10" android:contentDescription="@string/player_rewind" />
+  <ImageButton android:id="@id/exo_play_pause" style="@style/Widget.YouTubeCar.PlayButton" android:layout_marginHorizontal="24dp" android:contentDescription="@string/player_play_pause" />
+  <ImageButton android:id="@+id/player_mode" style="@style/Widget.YouTubeCar.ModeButton" android:layout_marginEnd="24dp" android:src="@drawable/ic_headphones" android:contentDescription="@string/player_switch_to_audio" />
+  <ImageButton android:id="@id/exo_ffwd" style="@style/Widget.YouTubeCar.IconButton" android:src="@drawable/ic_forward_10" android:contentDescription="@string/player_fast_forward" />
+ </LinearLayout>
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="bottom" android:background="@drawable/bg_gradient_bottom" android:orientation="vertical" android:paddingHorizontal="18dp" android:paddingBottom="6dp">
+ <androidx.media3.ui.DefaultTimeBar android:id="@id/exo_progress" android:layout_width="match_parent" android:layout_height="48dp" app:bar_height="5dp" app:played_color="@color/car_primary" app:buffered_color="#66FFFFFF" app:unplayed_color="#33FFFFFF" app:scrubber_color="@color/car_primary" app:scrubber_enabled_size="14dp" app:scrubber_dragged_size="22dp" app:touch_target_height="48dp" />
+ <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="24dp" android:gravity="center_vertical" android:orientation="horizontal">
+  <TextView android:id="@id/exo_position" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/car_on_surface" android:textSize="14sp" />
+  <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/time_separator" android:textColor="@color/car_on_surface_variant" />
+  <TextView android:id="@id/exo_duration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@color/car_on_surface_variant" android:textSize="14sp" />
+ </LinearLayout></LinearLayout>
+</merge>

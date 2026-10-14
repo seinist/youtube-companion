@@ -1,0 +1,7 @@
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33FFFFFF">
+    <item><selector>
+        <item android:state_selected="true"><shape><solid android:color="@color/car_primary" /><corners android:radius="@dimen/car_corner_radius" /></shape></item>
+        <item android:state_focused="true"><shape><solid android:color="@color/car_surface_high" /><stroke android:width="2dp" android:color="@color/car_on_surface" /><corners android:radius="@dimen/car_corner_radius" /></shape></item>
+        <item><shape><solid android:color="@color/car_surface_high" /><corners android:radius="@dimen/car_corner_radius" /></shape></item>
+    </selector></item>
+</ripple>

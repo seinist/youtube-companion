@@ -1,0 +1,4 @@
+PASS XML parse: 122 files
+PASS short AA onStop keeps decoder/surface warm for 10 s
+PASS stale HEAD_UNIT STOP is rejected before destructive actions
+PASS source policy regression checks

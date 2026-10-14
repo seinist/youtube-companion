@@ -1,0 +1,21 @@
+PASS auto-720
+PASS portrait-720
+PASS square-over-budget
+PASS projection-25
+PASS speed-2x-source-limit
+PASS effective-decode-fps
+PASS thermal-moderate
+PASS thermal-severe
+PASS thermal-critical
+PASS explicit-preserved
+PASS projection-capped
+PASS relax-fps
+PASS avc-family
+PASS vp9-family
+PASS av1-family
+PASS hardware-before-fps
+PASS fps-within-hardware
+PASS higher-picture-auto
+PASS high-fps-smallest-fallback
+PASS thermal-budget-enforced
+20 scenarios passed

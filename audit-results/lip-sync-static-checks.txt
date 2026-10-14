@@ -1,0 +1,5 @@
+PASS: 51 Kotlin files parsed; 93 XML files parsed.
+PASS: Python harness AST.
+PASS: new layout strings/colors/IDs and Kotlin resource references.
+PASS: git diff --check.
+Not an Android resource compilation or UI/device test.

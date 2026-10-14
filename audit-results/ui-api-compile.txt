@@ -1,0 +1,221 @@
+Isolated Kotlin/API compile: PASS. Actual dependency classes; R/BuildConfig/ViewBinding substitutes. No Gradle, APK or R8 build.
+Production Kotlin files: 60
+app/src/main/java/de/uni/youtubeaa/YouTubeBrowseActivity.kt:254:98: warning: 'static field SHOW_IMPLICIT: Int' is deprecated. Deprecated in Java.
+                        ?.showSoftInput(searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                                                                                                 ^^^^^^^^^^^^^
+app/src/main/java/de/uni/youtubeaa/YouTubeBrowseActivity.kt:403:97: warning: 'static field SHOW_IMPLICIT: Int' is deprecated. Deprecated in Java.
+                    imm?.showSoftInput(searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                                                                                                ^^^^^^^^^^^^^
+app/src/main/java/de/uni/youtubeaa/YouTubeBrowseActivity.kt:969:98: warning: 'static field SHOW_IMPLICIT: Int' is deprecated. Deprecated in Java.
+                        ?.showSoftInput(searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                                                                                                 ^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:5:8: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+import androidx.security.crypto.EncryptedSharedPreferences
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:6:8: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+import androidx.security.crypto.MasterKey
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:21:25: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+        val masterKey = MasterKey.Builder(appContext)
+                        ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:21:35: warning: 'constructor(p0: Context): MasterKey.Builder' is deprecated. Deprecated in Java.
+        val masterKey = MasterKey.Builder(appContext)
+                                  ^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:22:27: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                          ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:22:37: warning: 'enum class KeyScheme : Enum<MasterKey.KeyScheme!>' is deprecated. Deprecated in Java.
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                    ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:24:9: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+        EncryptedSharedPreferences.create(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:28:13: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:28:40: warning: 'enum class PrefKeyEncryptionScheme : Enum<EncryptedSharedPreferences.PrefKeyEncryptionScheme!>' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                       ^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:29:13: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:29:40: warning: 'enum class PrefValueEncryptionScheme : Enum<EncryptedSharedPreferences.PrefValueEncryptionScheme!>' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:37:29: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+            val masterKey = MasterKey.Builder(appContext)
+                            ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:37:39: warning: 'constructor(p0: Context): MasterKey.Builder' is deprecated. Deprecated in Java.
+            val masterKey = MasterKey.Builder(appContext)
+                                      ^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:38:31: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                              ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:38:41: warning: 'enum class KeyScheme : Enum<MasterKey.KeyScheme!>' is deprecated. Deprecated in Java.
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                        ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:40:13: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.create(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:44:17: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:44:44: warning: 'enum class PrefKeyEncryptionScheme : Enum<EncryptedSharedPreferences.PrefKeyEncryptionScheme!>' is deprecated. Deprecated in Java.
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                           ^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:45:17: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/AccountManager.kt:45:44: warning: 'enum class PrefValueEncryptionScheme : Enum<EncryptedSharedPreferences.PrefValueEncryptionScheme!>' is deprecated. Deprecated in Java.
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/StreamResolver.kt:366:43: warning: unnecessary safe call on a non-null receiver of type 'ResponseBody'.
+                val responseBody = it.body?.string() ?: ""
+                                          ^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:22:8: warning: 'class MediaBrowserServiceCompat : Service' is deprecated. Deprecated in Java.
+import androidx.media.MediaBrowserServiceCompat
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:23:8: warning: 'class MediaSessionManager : Any' is deprecated. Deprecated in Java.
+import androidx.media.MediaSessionManager
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:24:8: warning: 'class MediaButtonReceiver : BroadcastReceiver' is deprecated. Deprecated in Java.
+import androidx.media.session.MediaButtonReceiver
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:25:8: warning: 'class MediaConstants : Any' is deprecated. Deprecated in Java.
+import androidx.media.utils.MediaConstants
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:44:36: warning: 'class MediaBrowserServiceCompat : Service' is deprecated. Deprecated in Java.
+class YouTubeMediaBrowserService : MediaBrowserServiceCompat() {
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:80:9: warning: 'class MediaButtonReceiver : BroadcastReceiver' is deprecated. Deprecated in Java.
+        MediaButtonReceiver.handleIntent(mediaSessionHolder.mediaSession, intent)
+        ^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:177:17: warning: 'class MediaButtonReceiver : BroadcastReceiver' is deprecated. Deprecated in Java.
+                MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_STOP)
+                ^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:183:21: warning: 'class MediaButtonReceiver : BroadcastReceiver' is deprecated. Deprecated in Java.
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    ^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:193:21: warning: 'class MediaButtonReceiver : BroadcastReceiver' is deprecated. Deprecated in Java.
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    ^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:203:21: warning: 'class MediaButtonReceiver : BroadcastReceiver' is deprecated. Deprecated in Java.
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
+                    ^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:207:36: warning: 'class NotificationCompat : Any' is deprecated. Deprecated in Java.
+                androidx.media.app.NotificationCompat.MediaStyle()
+                                   ^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:207:55: warning: 'constructor(): NotificationCompat.MediaStyle' is deprecated. Deprecated in Java.
+                androidx.media.app.NotificationCompat.MediaStyle()
+                                                      ^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:222:8: warning: 'class BrowserRoot : Any' is deprecated. Deprecated in Java.
+    ): BrowserRoot? {
+       ^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:224:29: warning: 'class MediaSessionManager : Any' is deprecated. Deprecated in Java.
+        val trustedClient = MediaSessionManager.getSessionManager(this).isTrustedForMediaControl(
+                            ^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:225:13: warning: 'class MediaSessionManager : Any' is deprecated. Deprecated in Java.
+            MediaSessionManager.RemoteUserInfo(
+            ^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:225:33: warning: 'constructor(p0: String, p1: Int, p2: Int): MediaSessionManager.RemoteUserInfo' is deprecated. Deprecated in Java.
+            MediaSessionManager.RemoteUserInfo(
+                                ^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:231:48: warning: 'constructor(p0: String, p1: Bundle?): MediaBrowserServiceCompat.BrowserRoot' is deprecated. Deprecated in Java.
+        return if (ownClient || trustedClient) BrowserRoot(ROOT_ID, null) else null
+                                               ^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:234:59: warning: 'class Result<T : Any!> : Any' is deprecated. Deprecated in Java.
+    override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaItem>>) {
+                                                          ^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:259:67: warning: 'class Result<T : Any!> : Any' is deprecated. Deprecated in Java.
+    override fun onSearch(query: String, extras: Bundle?, result: Result<MutableList<MediaItem>>) {
+                                                                  ^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:285:41: warning: 'class MediaConstants : Any' is deprecated. Deprecated in Java.
+                contentStyleBrowsable = MediaConstants.DESCRIPTION_EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM
+                                        ^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:395:17: warning: 'class MediaConstants : Any' is deprecated. Deprecated in Java.
+                MediaConstants.DESCRIPTION_EXTRAS_KEY_CONTENT_STYLE_PLAYABLE,
+                ^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:396:17: warning: 'class MediaConstants : Any' is deprecated. Deprecated in Java.
+                MediaConstants.DESCRIPTION_EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM
+                ^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:420:27: warning: 'class MediaConstants : Any' is deprecated. Deprecated in Java.
+            extras.putInt(MediaConstants.DESCRIPTION_EXTRAS_KEY_CONTENT_STYLE_BROWSABLE, it)
+                          ^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/YouTubeMediaBrowserService.kt:423:27: warning: 'class MediaConstants : Any' is deprecated. Deprecated in Java.
+            extras.putInt(MediaConstants.DESCRIPTION_EXTRAS_KEY_CONTENT_STYLE_PLAYABLE, it)
+                          ^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:5:8: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+import androidx.security.crypto.EncryptedSharedPreferences
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:6:8: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+import androidx.security.crypto.MasterKey
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:33:25: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+        val masterKey = MasterKey.Builder(appContext)
+                        ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:33:35: warning: 'constructor(p0: Context): MasterKey.Builder' is deprecated. Deprecated in Java.
+        val masterKey = MasterKey.Builder(appContext)
+                                  ^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:34:27: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                          ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:34:37: warning: 'enum class KeyScheme : Enum<MasterKey.KeyScheme!>' is deprecated. Deprecated in Java.
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                    ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:36:9: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+        EncryptedSharedPreferences.create(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:40:13: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:40:40: warning: 'enum class PrefKeyEncryptionScheme : Enum<EncryptedSharedPreferences.PrefKeyEncryptionScheme!>' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                       ^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:41:13: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:41:40: warning: 'enum class PrefValueEncryptionScheme : Enum<EncryptedSharedPreferences.PrefValueEncryptionScheme!>' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:47:29: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+            val masterKey = MasterKey.Builder(appContext)
+                            ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:47:39: warning: 'constructor(p0: Context): MasterKey.Builder' is deprecated. Deprecated in Java.
+            val masterKey = MasterKey.Builder(appContext)
+                                      ^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:48:31: warning: 'class MasterKey : Any' is deprecated. Deprecated in Java.
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                              ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:48:41: warning: 'enum class KeyScheme : Enum<MasterKey.KeyScheme!>' is deprecated. Deprecated in Java.
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                        ^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:50:13: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+            EncryptedSharedPreferences.create(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:54:17: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:54:44: warning: 'enum class PrefKeyEncryptionScheme : Enum<EncryptedSharedPreferences.PrefKeyEncryptionScheme!>' is deprecated. Deprecated in Java.
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                                           ^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:55:17: warning: 'class EncryptedSharedPreferences : Any, SharedPreferences' is deprecated. Deprecated in Java.
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtSessionStore.kt:55:44: warning: 'enum class PrefValueEncryptionScheme : Enum<EncryptedSharedPreferences.PrefValueEncryptionScheme!>' is deprecated. Deprecated in Java.
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtTvAuthClient.kt:77:41: warning: unnecessary safe call on a non-null receiver of type 'ResponseBody'.
+                val text = response.body?.string().orEmpty()
+                                        ^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtTvAuthClient.kt:143:37: warning: unnecessary safe call on a non-null receiver of type 'ResponseBody'.
+            val text = response.body?.string().orEmpty()
+                                    ^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtTvAuthClient.kt:212:55: warning: unnecessary safe call on a non-null receiver of type 'ResponseBody'.
+                val snippet = JSONObject(response.body?.string().orEmpty())
+                                                      ^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtTvAuthClient.kt:240:41: warning: unnecessary safe call on a non-null receiver of type 'ResponseBody'.
+                val html = response.body?.string().orEmpty()
+                                        ^^
+car/src/main/java/de/uni/youtubeaa/car/hybrid/YtTvAuthClient.kt:270:41: warning: unnecessary safe call on a non-null receiver of type 'ResponseBody'.
+                val text = response.body?.string().orEmpty()
+                                        ^^

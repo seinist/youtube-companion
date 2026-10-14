@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/lip_sync_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
+        android:gravity="center"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:textColor="@color/car_on_surface"
+        android:textSize="32sp"
+        android:textStyle="bold" />
+
+    <SeekBar
+        android:id="@+id/lip_sync_slider"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:contentDescription="@string/player_lip_sync_title"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:progressTint="@color/car_primary"
+        android:thumbTint="@color/car_primary" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/lip_sync_earlier"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/bg_car_button"
+            android:minHeight="60dp"
+            android:padding="8dp"
+            android:text="@string/player_lip_sync_earlier"
+            android:textAllCaps="false"
+            android:textColor="@color/car_on_surface"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/lip_sync_later"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/bg_car_button"
+            android:minHeight="60dp"
+            android:padding="8dp"
+            android:text="@string/player_lip_sync_later"
+            android:textAllCaps="false"
+            android:textColor="@color/car_on_surface"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="14dp"
+        android:text="@string/player_lip_sync_hint"
+        android:textColor="@color/car_on_surface_variant"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/lip_sync_reset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_car_button"
+        android:minHeight="60dp"
+        android:padding="12dp"
+        android:text="@string/player_lip_sync_reset"
+        android:textAllCaps="false"
+        android:textColor="@color/car_on_surface"
+        android:textSize="17sp" />
+</LinearLayout>

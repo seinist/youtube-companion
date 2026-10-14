@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/car_video_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/car_surface">
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/park_warning"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/car_scrim"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="28dp"
+            android:background="@drawable/bg_car_warning_card"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="28dp">
+
+            <TextView
+                android:id="@+id/park_warning_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/park_warning_title"
+                android:textColor="@color/car_on_surface"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/park_warning_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="@string/park_warning_message"
+                android:textColor="@color/car_on_surface_variant"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/park_warning_continue"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_car_button_primary"
+                android:minWidth="180dp"
+                android:paddingHorizontal="24dp"
+                android:text="@string/park_warning_continue"
+                android:textAllCaps="false"
+                android:textColor="@color/car_on_primary"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>
