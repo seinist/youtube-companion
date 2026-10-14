@@ -1,0 +1,101 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: APK variant
+        type: choice
+        options: [debug, release]
+        default: debug
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    env:
+      VARIANT: ${{ github.event_name == 'release' && 'release' || inputs.variant }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android SDK platform
+        run: sdkmanager 'platforms;android-37'
+      - name: Prepare release signing
+        if: env.VARIANT == 'release'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          from pathlib import Path
+
+          names = ('KEYSTORE_BASE64', 'STORE_PASSWORD', 'KEY_ALIAS', 'KEY_PASSWORD')
+          missing = [name for name in names if not os.environ.get(name)]
+          if missing:
+              raise SystemExit('Missing signing secrets: ' + ', '.join(missing))
+          os.umask(0o077)
+          key = Path(os.environ['RUNNER_TEMP']) / 'release.jks'
+          key.write_bytes(base64.b64decode(os.environ['KEYSTORE_BASE64'], validate=True))
+
+          def escape(value):
+              # java.util.Properties uses Latin-1 and Java Unicode escapes.
+              result = ''
+              encoded = value.encode('utf-16-be')
+              for i in range(0, len(encoded), 2):
+                  code = int.from_bytes(encoded[i:i + 2], 'big')
+                  char = chr(code)
+                  if char in '\\ =:#!':
+                      result += '\\' + char
+                  elif code < 32 or code > 126:
+                      result += '\\u%04x' % code
+                  else:
+                      result += char
+              return result
+
+          values = {'storeFile': str(key), 'storePassword': os.environ['STORE_PASSWORD'],
+                    'keyAlias': os.environ['KEY_ALIAS'], 'keyPassword': os.environ['KEY_PASSWORD']}
+          Path('keystore.properties').write_text(
+              ''.join(f'{name}={escape(value)}\n' for name, value in values.items()), encoding='ascii')
+          PY
+      - name: Build APK
+        run: |
+          chmod +x gradlew
+          bash build.sh "$VARIANT"
+      - name: Verify release signature
+        if: env.VARIANT == 'release'
+        run: |
+          signer=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          test -n "$signer"
+          "$signer" verify dist/*-release-*.apk
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: youtube-aa-companion-${{ env.VARIANT }}
+          path: dist/*.apk
+          if-no-files-found: error
+      - name: Attach APK to published release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" dist/*.apk --clobber
+      - name: Remove signing files
+        if: always()
+        run: rm -f keystore.properties "$RUNNER_TEMP/release.jks"
