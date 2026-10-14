@@ -33,7 +33,7 @@ jobs:
       - name: Set up Android SDK tools
         uses: android-actions/setup-android@v4
       - name: Install Android SDK platform
-        run: sdkmanager 'platforms;android-37'
+        run: sdkmanager 'platforms;android-37.0'
       - name: Prepare release signing
         if: env.VARIANT == 'release'
         env:
