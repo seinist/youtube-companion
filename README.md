@@ -67,6 +67,7 @@ If you enjoy YouTube Companion, a coffee or a GitHub sponsorship helps support i
 - Queue, previous/next and optional **autoplay**
 - Playback speed from **0.25× to 2×**
 - Video quality, audio language and audio quality selection
+- App in **English and German** (follows the device language; per-app language on Android 13+)
 
 </td>
 </tr>

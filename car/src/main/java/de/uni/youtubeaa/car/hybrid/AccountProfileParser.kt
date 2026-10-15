@@ -5,6 +5,7 @@ import org.json.JSONObject
 
 /** Only account renderers may identify the user; recommended channels are never candidates. */
 internal object AccountProfileParser {
+    /** "YouTube-Konto verknüpft" is a placeholder label older versions stored, not a name; keep it German. */
     fun displayName(value: String?): String? = value?.trim()?.takeUnless {
         it.isEmpty() || it == "null" || it == "YouTube-Konto verknüpft"
     }

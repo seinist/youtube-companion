@@ -54,7 +54,7 @@ class TvLoginActivity : AppCompatActivity() {
         }
         findViewById<MaterialButton>(R.id.tv_login_copy).setOnClickListener {
             copyToClipboard(codeView.text?.toString().orEmpty())
-            Toast.makeText(this, "Code kopiert", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.tv_login_code_copied, Toast.LENGTH_SHORT).show()
         }
         findViewById<MaterialButton>(R.id.tv_login_skip).setOnClickListener {
             setResult(RESULT_CANCELED)
@@ -69,7 +69,7 @@ class TvLoginActivity : AppCompatActivity() {
     private fun startLogin() {
         pollJob?.cancel()
         status.setText(R.string.tv_login_preparing)
-        codeView.text = "————"
+        codeView.setText(R.string.device_code_placeholder)
         pollJob = lifecycleScope.launch {
             try {
                 val client = withContext(Dispatchers.IO) { auth.resolveClientIdentity() }
@@ -106,7 +106,7 @@ class TvLoginActivity : AppCompatActivity() {
                 }
                 status.setText(R.string.tv_login_success)
                 clearDeviceCodeFromClipboard()
-                Toast.makeText(this@TvLoginActivity, "Konto verknüpft", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@TvLoginActivity, R.string.tv_login_account_linked, Toast.LENGTH_SHORT).show()
                 setResult(RESULT_OK)
                 finish()
             } catch (e: Exception) {

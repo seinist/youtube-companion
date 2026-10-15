@@ -165,17 +165,17 @@ class StreamResolver {
                 )
             }
 
-            Result.Error("Kein abspielbarer Audio-Stream gefunden")
+            Result.Error(AppText.get(R.string.stream_error_no_audio))
         } catch (e: IOException) {
-            Result.Error("Netzwerkfehler bei der Stream-Extraktion")
+            Result.Error(AppText.get(R.string.stream_error_network))
         } catch (e: ExtractionException) {
-            Result.Error("Stream konnte nicht extrahiert werden: ${e.message}")
+            Result.Error(AppText.get(R.string.stream_error_extraction, e.message.orEmpty()))
         } catch (e: Exception) {
             // NewPipeExtractor can throw undeclared RuntimeExceptions (NPE, JSON/regex parse
             // errors, ...) when YouTube changes page structure. Uncaught, this would crash the
             // whole process on this coroutine — including the AA projection (same process).
-            Log.e(TAG, "Unerwarteter Fehler bei Audio-Stream-Extraktion", e)
-            Result.Error("Stream konnte nicht extrahiert werden: ${e.message}")
+            Log.e(TAG, "Unexpected error while extracting the audio stream", e)
+            Result.Error(AppText.get(R.string.stream_error_extraction, e.message.orEmpty()))
         }
     }
 
@@ -331,7 +331,7 @@ class StreamResolver {
                 if (selected != null && selected.muxed) {
                     val selectedMuxed = selected.stream
                     val url = selectedMuxed.content.takeIf { it.isNotBlank() }
-                        ?: return@withContext VideoResult.Error("Muxed-Stream-URL fehlt")
+                        ?: return@withContext VideoResult.Error(AppText.get(R.string.stream_error_muxed_url_missing))
                     logVideoSelection(videoId, "muxed", selectedMuxed, quality, effectiveMaxFps, videoBudget)
                     return@withContext VideoResult.Muxed(
                         url,
@@ -343,7 +343,7 @@ class StreamResolver {
                 if (selected != null) {
                     val selectedVideo = selected.stream
                     val videoUrl = selectedVideo.content.takeIf { it.isNotBlank() }
-                        ?: return@withContext VideoResult.Error("Video-Stream-URL fehlt")
+                        ?: return@withContext VideoResult.Error(AppText.get(R.string.stream_error_video_url_missing))
                     val audioUrl = bestAudio?.content?.takeIf { it.isNotBlank() }
                     logVideoSelection(videoId, "separate", selectedVideo, quality, effectiveMaxFps, videoBudget)
                     return@withContext VideoResult.Separate(
@@ -372,20 +372,20 @@ class StreamResolver {
                         "video videoId=$videoId no-hardware-candidate quality=$quality " +
                             "excluded=${excludedStreamIds.joinToString()} manifest=false"
                     )
-                    return@withContext VideoResult.Error("Kein hardware-dekodierbarer Video-Stream gefunden")
+                    return@withContext VideoResult.Error(AppText.get(R.string.stream_error_no_hardware_video))
                 }
 
-                VideoResult.Error("Kein abspielbarer Video-Stream gefunden")
+                VideoResult.Error(AppText.get(R.string.stream_error_no_video))
             } catch (e: IOException) {
-                VideoResult.Error("Netzwerkfehler bei der Stream-Extraktion")
+                VideoResult.Error(AppText.get(R.string.stream_error_network))
             } catch (e: ExtractionException) {
-                VideoResult.Error("Stream konnte nicht extrahiert werden: ${e.message}")
+                VideoResult.Error(AppText.get(R.string.stream_error_extraction, e.message.orEmpty()))
             } catch (e: Exception) {
                 // See resolveAudioStreamUrl: NewPipeExtractor isn't guaranteed to wrap every
                 // failure in ExtractionException; an uncaught throw here crashes the shared
                 // process (phone UI and AA projection both go down together).
-                Log.e(TAG, "Unerwarteter Fehler bei Video-Stream-Extraktion", e)
-                VideoResult.Error("Stream konnte nicht extrahiert werden: ${e.message}")
+                Log.e(TAG, "Unexpected error while extracting the video stream", e)
+                VideoResult.Error(AppText.get(R.string.stream_error_extraction, e.message.orEmpty()))
             }
         }
 

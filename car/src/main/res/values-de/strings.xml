@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_default_tab">Start-Tab</string>
+    <string name="error_generic">Etwas ist schiefgelaufen</string>
+    <string name="error_network">Keine Internetverbindung</string>
+    <string name="video_placeholder">YouTube Video (AA Projection)</string>
+    <string name="park_warning_title">Parkstatus nicht bestätigt</string>
+    <string name="park_warning_message">Video nur im sicheren Stand verwenden. Wenn der Parkstatus nicht ermittelt werden kann, bestätige dies erst am stehenden Fahrzeug.</string>
+    <string name="park_warning_continue">Trotzdem fortfahren</string>
+    <string name="video_error_stream">Video-Stream konnte nicht geladen werden</string>
+    <string name="browse_back">Zurück</string>
+    <string name="browse_home">Startseite · Empfehlungen</string>
+    <string name="browse_subscriptions">Abos</string>
+    <string name="browse_history">Verlauf</string>
+    <string name="browse_search_popular">Beliebt</string>
+    <string name="browse_shorts">Shorts</string>
+    <string name="browse_shorts_empty">Keine Shorts in deinen Abos.</string>
+    <string name="browse_loading">Laden …</string>
+    <string name="browse_not_logged_in">Bitte zuerst in der Smartphone-App anmelden.</string>
+    <string name="browse_empty">Keine Einträge</string>
+    <string name="browse_error">Laden fehlgeschlagen</string>
+    <string name="browse_search_hint">YouTube suchen</string>
+    <string name="browse_search_results">Suche</string>
+    <string name="browse_settings">Einstellungen</string>
+    <string name="browse_my_playlist">Meine Playlist</string>
+    <string name="browse_playlist_add">+ Playlist</string>
+    <string name="browse_playlist_play_all">Playlist abspielen</string>
+    <string name="browse_playlist_clear">Playlist leeren</string>
+    <string name="browse_playlist_empty">Playlist ist leer</string>
+    <string name="browse_playlist_added">Zur Playlist hinzugefügt</string>
+    <string name="browse_playlist_removed">Aus Playlist entfernt</string>
+    <string name="browse_playlist_remove_short">Entf.</string>
+    <string name="car_settings_title">Einstellungen</string>
+    <string name="car_settings_hint">Tippen wechselt den Wert (gilt auch für die Handy-App)</string>
+    <string name="settings_quality">Video-Auflösung</string>
+    <string name="settings_speed">Geschwindigkeit</string>
+    <string name="settings_audio_language">Audiosprache</string>
+    <string name="settings_audio_bitrate">Audio-Bitrate</string>
+    <string name="settings_backend">Video-Backend</string>
+    <string name="settings_surface">Video-Oberfläche (nächster Player)</string>
+    <string name="settings_autoplay">Autoplay</string>
+    <string name="settings_require_parked">Parkprüfung</string>
+    <string name="settings_history">Verlauf speichern</string>
+    <string name="settings_cache">Cache-Größe</string>
+    <string name="player_speed">Tempo</string>
+    <string name="player_quality">Qualität</string>
+    <string name="player_audio">Sprache</string>
+    <string name="player_mode_video">Video</string>
+    <string name="player_mode_audio">Audio</string>
+    <string name="player_switch_to_video">Zum Video</string>
+    <string name="player_switch_to_audio">Nur Audio</string>
+    <string name="settings_playback_mode">Wiedergabemodus</string>
+    <string name="settings_playback_mode_car">AA Wiedergabemodus</string>
+    <string name="video_player_loading">Video wird geladen …</string>
+    <string name="video_player_loading_audio">Audio wird geladen …</string>
+    <string name="notif_channel_playback">Wiedergabe</string>
+    <string name="notif_play">Abspielen</string>
+    <string name="notif_pause">Pause</string>
+    <string name="notif_previous">Vorheriges</string>
+    <string name="notif_next">Nächstes</string>
+    <string name="player_settings">Einstellungen</string>
+    <string name="player_setting_speed">Geschwindigkeit · %1$s</string>
+    <string name="player_setting_quality">Qualität · %1$s</string>
+    <string name="player_setting_audio">Audiospur · %1$s</string>
+    <string name="player_setting_audio_quality">Audioqualität · %1$s</string>
+    <string name="player_setting_cache">Cache · %1$s</string>
+    <string name="player_cache_title">Cache-Größe</string>
+    <string name="player_speed_title">Wiedergabegeschwindigkeit</string>
+    <string name="player_quality_title">Videoqualität</string>
+    <string name="player_audio_track_title">Audiospur</string>
+    <string name="player_audio_quality_title">Audioqualität</string>
+    <string name="player_quality_auto">Auto (empfohlen)</string>
+    <string name="player_audio_auto">Auto (Original)</string>
+    <string name="player_audio_device">Gerätesprache</string>
+    <string name="player_audio_original">Original</string>
+    <string name="player_audio_german">Deutsch</string>
+    <string name="player_audio_english">Englisch</string>
+    <string name="player_audio_quality_auto">Auto (beste verfügbare)</string>
+    <string name="player_audio_quality_high">Hoch</string>
+    <string name="player_audio_quality_medium">Mittel</string>
+    <string name="player_audio_quality_low">Niedrig</string>
+    <string name="browse_retry">Neu laden</string>
+    <string name="player_play_pause">Wiedergabe/Pause</string>
+    <string name="player_rewind">Zurückspulen</string>
+    <string name="player_fast_forward">Vorspulen</string>
+    <string name="player_previous">Vorheriges Video</string>
+    <string name="player_next">Nächstes Video</string>
+    <string name="browse_search_results_for">Suche: %1$s</string>
+    <string name="player_lip_sync_title">Lip-Sync</string>
+    <string name="player_setting_lip_sync">Lip-Sync: %1$s</string>
+    <string name="player_lip_sync_value">%1$s ms</string>
+    <string name="player_lip_sync_earlier">Ton früher\n−25 ms</string>
+    <string name="player_lip_sync_later">Ton später\n+25 ms</string>
+    <string name="player_lip_sync_hint">Ton zu früh? Richtung + verschieben. Ton zu spät? Richtung − verschieben.\n\nNur für Video auf der Head Unit. Wird automatisch gespeichert.</string>
+    <string name="player_lip_sync_reset">Auf 0 ms zurücksetzen</string>
+    <string name="browse_feed_more">Weitere Videos laden</string>
+    <string name="browse_feed_retry">Feed unvollständig – erneut laden</string>
+    <string name="playback_status_buffering">Wiedergabe wird gepuffert…</string>
+    <string name="playback_status_paused">Pausiert</string>
+    <string name="playback_status_interrupted">Audio vorübergehend unterbrochen</string>
+    <string name="playback_status_error">Wiedergabe nicht möglich</string>
+    <string name="playback_status_network">Verbindung unterbrochen</string>
+    <string name="playback_status_retry">Wiederholen</string>
+    <string name="browse_refresh">Aktualisieren</string>
+    <string name="browse_refreshing">Wird aktualisiert …</string>
+    <string name="browse_refresh_failed">Aktualisieren – letzter Versuch fehlgeschlagen</string>
+    <string name="browse_refresh_at">Aktualisieren · Stand %1$s</string>
+    <string name="browse_show_cards">Karten anzeigen</string>
+    <string name="browse_show_list">Liste anzeigen</string>
+    <string name="settings_browse_layout">AA Browser-Darstellung</string>
+
+    <!-- Android-Auto-Medienbrowser (Wurzel) -->
+    <string name="browse_root_home">Startseite</string>
+
+    <!-- Werte der Android-Auto-Einstellungen -->
+    <string name="car_value_auto">Auto</string>
+    <string name="car_value_on">An</string>
+    <string name="car_value_off">Aus</string>
+    <string name="car_layout_cards">Karten</string>
+    <string name="car_layout_list">Liste</string>
+    <string name="car_tab_home">Home</string>
+    <string name="car_tab_subscriptions">Abos</string>
+    <string name="car_tab_popular">Beliebt</string>
+    <string name="car_tab_history">Verlauf</string>
+    <string name="car_tab_playlist">Gespeichert</string>
+    <string name="car_audio_device">Gerät</string>
+    <string name="car_surface_performance">SurfaceView (Performance)</string>
+    <string name="car_surface_compat">TextureView (Kompatibilität)</string>
+
+    <!-- Alter eines Videos, z. B. „vor 3 Tagen“ -->
+    <string name="age_just_now">gerade eben</string>
+    <string name="age_minutes">vor %1$d Min.</string>
+    <string name="age_hours">vor %1$d Std.</string>
+    <plurals name="age_days">
+        <item quantity="one">vor %1$d Tag</item>
+        <item quantity="other">vor %1$d Tagen</item>
+    </plurals>
+    <plurals name="age_weeks">
+        <item quantity="one">vor %1$d Woche</item>
+        <item quantity="other">vor %1$d Wochen</item>
+    </plurals>
+    <plurals name="age_months">
+        <item quantity="one">vor %1$d Monat</item>
+        <item quantity="other">vor %1$d Monaten</item>
+    </plurals>
+    <plurals name="age_years">
+        <item quantity="one">vor %1$d Jahr</item>
+        <item quantity="other">vor %1$d Jahren</item>
+    </plurals>
+
+    <!-- Wiedergabe- und Stream-Fehler -->
+    <string name="playback_error_detail">Wiedergabefehler: %1$s</string>
+    <string name="search_no_results_for">Keine Ergebnisse für %1$s</string>
+    <string name="stream_error_no_audio">Kein abspielbarer Audio-Stream gefunden</string>
+    <string name="stream_error_no_video">Kein abspielbarer Video-Stream gefunden</string>
+    <string name="stream_error_no_hardware_video">Kein hardware-dekodierbarer Video-Stream gefunden</string>
+    <string name="stream_error_network">Netzwerkfehler bei der Stream-Extraktion</string>
+    <string name="stream_error_extraction">Stream konnte nicht extrahiert werden: %1$s</string>
+    <string name="stream_error_muxed_url_missing">Muxed-Stream-URL fehlt</string>
+    <string name="stream_error_video_url_missing">Video-Stream-URL fehlt</string>
+
+    <!-- Fehler beim Laden der Listen -->
+    <string name="browse_error_search">Suche fehlgeschlagen</string>
+    <string name="browse_error_home">Startseite konnte nicht geladen werden</string>
+    <string name="browse_error_popular">Beliebt fehlgeschlagen</string>
+    <string name="browse_error_channel">Kanal fehlgeschlagen</string>
+    <string name="browse_error_subscriptions">Abos konnten nicht geladen werden</string>
+    <string name="browse_error_subscription_channels">Abo-Kanäle konnten nicht geladen werden</string>
+    <string name="browse_error_subscription_feed">Abo-Feed konnte nicht geladen werden</string>
+    <string name="browse_error_subscription_feed_retry">Abo-Feed konnte nicht geladen werden. Bitte erneut versuchen.</string>
+    <string name="browse_error_filter_gone">Filter nicht mehr verfügbar. Bitte „Alle“ wählen.</string>
+    <string name="browse_error_shorts">Shorts konnten nicht geladen werden. Bitte erneut versuchen.</string>
+    <string name="browse_error_feed_rejected">YouTube hat den Feed abgelehnt</string>
+    <string name="browse_error_no_video_tab">Der Kanal bietet keinen Video-Tab an</string>
+    <string name="browse_sign_in_required">Für Abos &amp; persönlichen Feed: YouTube-Konto verknüpfen (TV-Code). Suche &amp; Trends gehen anonym.</string>
+    <string name="account_not_signed_in">Nicht angemeldet</string>
+    <string name="account_switched">Konto wurde gewechselt</string>
+
+    <!-- YouTube-TV-Anmeldung -->
+    <string name="auth_error_client_identity">YouTube-TV-Anmeldedaten konnten nicht geladen werden. Optional YOUTUBE_TV_CLIENT_ID und YOUTUBE_TV_CLIENT_SECRET in gradle.properties setzen.</string>
+    <string name="auth_error_dns">DNS: Host nicht erreichbar (%1$s). Prüfe Internet/VPN/DNS – Login nutzt nur youtube.com.</string>
+    <string name="auth_status_dns_retry">DNS kurz nicht erreichbar, versuche weiter… (%1$d)</string>
+    <string name="auth_status_waiting">Warte auf Bestätigung… (%1$d)</string>
+    <string name="auth_error_denied">Login abgebrochen: %1$s</string>
+    <string name="auth_error_timeout">Login-Timeout – Code abgelaufen. Bitte erneut „Code anfordern“.</string>
+    <string name="auth_error_no_refresh_token">Kein refresh_token – in Google-Konto → Sicherheit → Drittanbieter-Zugriff widerrufen, dann neu versuchen</string>
+    <string name="auth_error_refresh_failed">Token-Refresh fehlgeschlagen: HTTP %1$d %2$s</string>
+    <string name="auth_error_refresh_dns">DNS: youtube.com nicht auflösbar beim Token-Refresh.</string>
+</resources>

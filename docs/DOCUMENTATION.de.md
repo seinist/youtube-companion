@@ -11,7 +11,7 @@
 
 [Zur README](../README.de.md)
 
-Dieses Handbuch beschreibt den implementierten Funktionsumfang von Smartphone-App, Android-Auto-Medienbrowser und Video-Projektion. Bezeichnungen und Standardwerte stammen aus den Einstellungsressourcen und dem Code. Die Dokumentation ist ein Abgleich mit dem Quellstand, kein zusätzlicher Geräte- oder Wiedergabetest.
+Dieses Handbuch beschreibt den implementierten Funktionsumfang von Smartphone-App, Android-Auto-Medienbrowser und Video-Projektion. Bezeichnungen und Standardwerte stammen aus den Einstellungsressourcen und dem Code. Die App gibt es auf Englisch (Standard) und Deutsch; dieses Handbuch nutzt die deutschen Bezeichnungen. Die Dokumentation ist ein Abgleich mit dem Quellstand, kein zusätzlicher Geräte- oder Wiedergabetest.
 
 | Tabellenspalte | Bedeutung |
 | --- | --- |

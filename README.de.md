@@ -67,6 +67,7 @@ Wenn dir YouTube Companion gefällt, kannst du die Weiterentwicklung mit einem K
 - Queue, Vorheriges/Nächstes und optionales **Autoplay**
 - Geschwindigkeit von **0,25× bis 2×**
 - Auswahl von Videoqualität, Audiosprache und Audioqualität
+- App auf **Englisch und Deutsch** (folgt der Gerätesprache; App-Sprache pro App ab Android 13)
 
 </td>
 </tr>

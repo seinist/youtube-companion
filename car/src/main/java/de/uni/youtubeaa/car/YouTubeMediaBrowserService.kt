@@ -575,12 +575,12 @@ class YouTubeMediaBrowserService : MediaBrowserServiceCompat() {
         // Search remains available through Android Auto's search affordance rather than as a tab.
         val style = browseContentStyle()
         return mutableListOf(
-            browsableItem(ID_HOME, "Startseite", style, style),
-            browsableItem(ID_SUBSCRIPTIONS, "Abos", style, style),
-            browsableItem(ID_SHORTS, "Shorts", style, style),
-            browsableItem(ID_POPULAR, "Beliebt", style, style),
-            browsableItem(ID_HISTORY, "Verlauf", style, style),
-            browsableItem(ID_PLAYLIST, "Meine Playlist", style, style)
+            browsableItem(ID_HOME, getString(R.string.browse_root_home), style, style),
+            browsableItem(ID_SUBSCRIPTIONS, getString(R.string.browse_subscriptions), style, style),
+            browsableItem(ID_SHORTS, getString(R.string.browse_shorts), style, style),
+            browsableItem(ID_POPULAR, getString(R.string.browse_search_popular), style, style),
+            browsableItem(ID_HISTORY, getString(R.string.browse_history), style, style),
+            browsableItem(ID_PLAYLIST, getString(R.string.browse_my_playlist), style, style)
         )
     }
 

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="tab_entries">
+        <item>Startseite</item>
+        <item>Abos</item>
+        <item>Suche</item>
+    </string-array>
+    <string-array name="quality_entries">
+        <item>Auto (empfohlen)</item>
+        <item>2160p (4K)</item>
+        <item>1440p</item>
+        <item>1080p</item>
+        <item>720p</item>
+        <item>480p</item>
+        <item>360p</item>
+        <item>240p</item>
+        <item>144p</item>
+    </string-array>
+    <string-array name="car_quality_entries">
+        <item>Auto (empfohlen)</item>
+        <item>1080p</item>
+        <item>720p</item>
+        <item>480p</item>
+        <item>360p</item>
+        <item>240p</item>
+        <item>144p</item>
+    </string-array>
+    <string-array name="backend_entries">
+        <item>ExoPlayer (empfohlen)</item>
+        <item>WebView (Kompatibilität)</item>
+    </string-array>
+    <string-array name="car_surface_entries">
+        <item>SurfaceView (empfohlen)</item>
+        <item>TextureView (Kompatibilität)</item>
+    </string-array>
+    <string-array name="audio_language_entries">
+        <item>Auto (Originalspur)</item>
+        <item>Gerätesprache</item>
+        <item>Originalspur</item>
+        <item>Deutsch</item>
+        <item>Englisch</item>
+    </string-array>
+    <string-array name="audio_bitrate_entries">
+        <item>Auto (höchste)</item>
+        <item>Hoch</item>
+        <item>Mittel</item>
+        <item>Niedrig</item>
+    </string-array>
+    <string-array name="playback_speed_entries">
+        <item>0,25×</item>
+        <item>0,5×</item>
+        <item>0,75×</item>
+        <item>1× (Normal)</item>
+        <item>1,25×</item>
+        <item>1,5×</item>
+        <item>1,75×</item>
+        <item>2×</item>
+    </string-array>
+    <string-array name="playback_mode_entries">
+        <item>Video</item>
+        <item>Nur Audio</item>
+    </string-array>
+    <string-array name="thumbnail_quality_entries">
+        <item>Auto (beste verfügbar)</item>
+        <item>Maximal</item>
+        <item>Hoch</item>
+        <item>Mittel</item>
+        <item>Niedrig</item>
+    </string-array>
+</resources>

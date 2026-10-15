@@ -11,7 +11,7 @@
 
 [Back to README](../README.md)
 
-This handbook describes the implemented phone app, Android Auto media browser and video projection. Labels and defaults are based on settings resources and code. English labels below translate the current German UI; they do not imply an English app localization. This is a source review, not an additional device or playback test.
+This handbook describes the implemented phone app, Android Auto media browser and video projection. Labels and defaults are based on settings resources and code. The app is available in English (default) and German; labels below are the English UI texts, the German handbook uses the German ones. This is a source review, not an additional device or playback test.
 
 | Table column | Meaning |
 | --- | --- |

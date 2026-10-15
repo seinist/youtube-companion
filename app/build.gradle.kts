@@ -54,6 +54,12 @@ android {
         }
     }
 
+    androidResources {
+        // The app ships English (default) and German. Dropping other languages from libraries
+        // keeps dialogs and system-provided labels in the same language as the app.
+        localeFilters += listOf("en", "de")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

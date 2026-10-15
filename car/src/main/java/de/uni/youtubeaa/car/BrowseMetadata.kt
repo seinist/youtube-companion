@@ -43,7 +43,7 @@ fun List<MediaDescriptionCompat>.newestFirst(): List<MediaDescriptionCompat> =
         .map { it.value }
 
 
-/** "vor 3 Tagen" like the YouTube cards; null without a known date. */
+/** "3 days ago" like the YouTube cards, in the app language; null without a known date. */
 fun relativePublishedLabel(publishedAtMs: Long, nowMs: Long = System.currentTimeMillis()): String? {
     if (publishedAtMs <= 0L) return null
     val elapsed = (nowMs - publishedAtMs).coerceAtLeast(0L)
@@ -53,19 +53,19 @@ fun relativePublishedLabel(publishedAtMs: Long, nowMs: Long = System.currentTime
     val week = 7L * day
     val month = 30L * day
     val year = 365L * day
-    fun plural(n: Long, one: String, many: String) = "vor $n ${if (n == 1L) one else many}"
+    fun plural(id: Int, n: Long): String = n.toInt().let { AppText.plural(id, it, it) }
     return when {
-        elapsed < minute -> "gerade eben"
-        elapsed < hour -> "vor ${elapsed / minute} Min."
-        elapsed < day -> "vor ${elapsed / hour} Std."
-        elapsed < week -> plural(elapsed / day, "Tag", "Tagen")
-        elapsed < month -> plural(elapsed / week, "Woche", "Wochen")
-        elapsed < year -> plural(elapsed / month, "Monat", "Monaten")
-        else -> plural(elapsed / year, "Jahr", "Jahren")
+        elapsed < minute -> AppText.get(R.string.age_just_now)
+        elapsed < hour -> AppText.get(R.string.age_minutes, (elapsed / minute).toInt())
+        elapsed < day -> AppText.get(R.string.age_hours, (elapsed / hour).toInt())
+        elapsed < week -> plural(R.plurals.age_days, elapsed / day)
+        elapsed < month -> plural(R.plurals.age_weeks, elapsed / week)
+        elapsed < year -> plural(R.plurals.age_months, elapsed / month)
+        else -> plural(R.plurals.age_years, elapsed / year)
     }
 }
 
-/** Channel line of a card or list row: "Kanal · vor 3 Tagen" (either part may be missing). */
+/** Channel line of a card or list row: "Channel · 3 days ago" (either part may be missing). */
 fun MediaDescriptionCompat.subtitleWithAge(): String? =
     listOfNotNull(
         subtitle?.toString()?.takeIf { it.isNotBlank() },

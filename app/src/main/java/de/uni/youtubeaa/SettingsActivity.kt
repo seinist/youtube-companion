@@ -53,7 +53,7 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<Preference>(KEY_CLEAR_HU_LOGS)?.setOnPreferenceClickListener {
                 HeadUnitDiagnostics.clear(requireContext())
                 AlertDialog.Builder(requireContext())
-                    .setMessage("Head-Unit-Logs wurden gelöscht.")
+                    .setMessage(R.string.hu_logs_cleared)
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
                 true
@@ -88,14 +88,14 @@ class SettingsActivity : AppCompatActivity() {
                 val share = Intent(Intent.ACTION_SEND).apply {
                     type = "application/zip"
                     putExtra(Intent.EXTRA_STREAM, uri)
-                    putExtra(Intent.EXTRA_SUBJECT, "YouTube AA Head-Unit Diagnose")
+                    putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.hu_logs_share_subject))
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                startActivity(Intent.createChooser(share, "Head-Unit-Logs teilen"))
+                startActivity(Intent.createChooser(share, getString(R.string.pref_share_hu_logs)))
             }.onFailure { error ->
                 HeadUnitDiagnostics.error("SettingsActivity", "diagnostic export failed", error)
                 AlertDialog.Builder(context)
-                    .setTitle("Export fehlgeschlagen")
+                    .setTitle(R.string.hu_logs_export_failed)
                     .setMessage(error.message ?: error.javaClass.simpleName)
                     .setPositiveButton(android.R.string.ok, null)
                     .show()

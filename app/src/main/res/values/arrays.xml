@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- string-array statt array: bei rein numerisch aussehenden <item>-Werten (siehe
-         cache_values) kompiliert AAPT2 ein generisches <array> sonst als Integer-Array,
-         wodurch ListPreference beim Lesen als CharSequence[] null-Einträge erhält (NPE in
-         ListPreference.findIndexOfValue). -->
+    <!-- string-array instead of array: for <item> values that look purely numeric (see
+         cache_values) AAPT2 would otherwise compile a generic <array> as an integer array,
+         so ListPreference reads null entries as CharSequence[] (NPE in
+         ListPreference.findIndexOfValue). Entries are translated in values-de/arrays.xml;
+         values are stored settings and must never be translated. -->
     <string-array name="tab_entries">
-        <item>Startseite</item>
-        <item>Abos</item>
-        <item>Suche</item>
+        <item>Home</item>
+        <item>Subscriptions</item>
+        <item>Search</item>
     </string-array>
-    <string-array name="tab_values">
+    <string-array name="tab_values" translatable="false">
         <item>home</item>
         <item>subscriptions</item>
         <item>search</item>
     </string-array>
     <string-array name="quality_entries">
-        <item>Auto (empfohlen)</item>
+        <item>Auto (recommended)</item>
         <item>2160p (4K)</item>
         <item>1440p</item>
         <item>1080p</item>
@@ -25,7 +26,7 @@
         <item>240p</item>
         <item>144p</item>
     </string-array>
-    <string-array name="quality_values">
+    <string-array name="quality_values" translatable="false">
         <item>auto</item>
         <item>2160</item>
         <item>1440</item>
@@ -37,7 +38,7 @@
         <item>144</item>
     </string-array>
     <string-array name="car_quality_entries">
-        <item>Auto (empfohlen)</item>
+        <item>Auto (recommended)</item>
         <item>1080p</item>
         <item>720p</item>
         <item>480p</item>
@@ -45,7 +46,7 @@
         <item>240p</item>
         <item>144p</item>
     </string-array>
-    <string-array name="car_quality_values">
+    <string-array name="car_quality_values" translatable="false">
         <item>auto</item>
         <item>1080</item>
         <item>720</item>
@@ -55,29 +56,29 @@
         <item>144</item>
     </string-array>
     <string-array name="backend_entries">
-        <item>ExoPlayer (empfohlen)</item>
-        <item>WebView (Kompatibilität)</item>
+        <item>ExoPlayer (recommended)</item>
+        <item>WebView (compatibility)</item>
     </string-array>
-    <string-array name="backend_values">
+    <string-array name="backend_values" translatable="false">
         <item>exoplayer</item>
         <item>webview</item>
     </string-array>
     <string-array name="car_surface_entries">
-        <item>SurfaceView (empfohlen)</item>
-        <item>TextureView (Kompatibilität)</item>
+        <item>SurfaceView (recommended)</item>
+        <item>TextureView (compatibility)</item>
     </string-array>
-    <string-array name="car_surface_values">
+    <string-array name="car_surface_values" translatable="false">
         <item>surface</item>
         <item>texture</item>
     </string-array>
     <string-array name="audio_language_entries">
-        <item>Auto (Originalspur)</item>
-        <item>Gerätesprache</item>
-        <item>Originalspur</item>
-        <item>Deutsch</item>
-        <item>Englisch</item>
+        <item>Auto (original track)</item>
+        <item>Device language</item>
+        <item>Original track</item>
+        <item>German</item>
+        <item>English</item>
     </string-array>
-    <string-array name="audio_language_values">
+    <string-array name="audio_language_values" translatable="false">
         <item>auto</item>
         <item>device</item>
         <item>original</item>
@@ -85,28 +86,28 @@
         <item>en</item>
     </string-array>
     <string-array name="audio_bitrate_entries">
-        <item>Auto (höchste)</item>
-        <item>Hoch</item>
-        <item>Mittel</item>
-        <item>Niedrig</item>
+        <item>Auto (highest)</item>
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
     </string-array>
-    <string-array name="audio_bitrate_values">
+    <string-array name="audio_bitrate_values" translatable="false">
         <item>auto</item>
         <item>high</item>
         <item>medium</item>
         <item>low</item>
     </string-array>
     <string-array name="playback_speed_entries">
-        <item>0,25×</item>
-        <item>0,5×</item>
-        <item>0,75×</item>
-        <item>1× (Normal)</item>
-        <item>1,25×</item>
-        <item>1,5×</item>
-        <item>1,75×</item>
+        <item>0.25×</item>
+        <item>0.5×</item>
+        <item>0.75×</item>
+        <item>1× (normal)</item>
+        <item>1.25×</item>
+        <item>1.5×</item>
+        <item>1.75×</item>
         <item>2×</item>
     </string-array>
-    <string-array name="playback_speed_values">
+    <string-array name="playback_speed_values" translatable="false">
         <item>0.25</item>
         <item>0.5</item>
         <item>0.75</item>
@@ -118,34 +119,34 @@
     </string-array>
     <string-array name="playback_mode_entries">
         <item>Video</item>
-        <item>Nur Audio</item>
+        <item>Audio only</item>
     </string-array>
-    <string-array name="playback_mode_values">
+    <string-array name="playback_mode_values" translatable="false">
         <item>video</item>
         <item>audio</item>
     </string-array>
 
     <string-array name="thumbnail_quality_entries">
-        <item>Auto (beste verfügbar)</item>
-        <item>Maximal</item>
-        <item>Hoch</item>
-        <item>Mittel</item>
-        <item>Niedrig</item>
+        <item>Auto (best available)</item>
+        <item>Maximum</item>
+        <item>High</item>
+        <item>Medium</item>
+        <item>Low</item>
     </string-array>
-    <string-array name="thumbnail_quality_values">
+    <string-array name="thumbnail_quality_values" translatable="false">
         <item>auto</item>
         <item>max</item>
         <item>high</item>
         <item>medium</item>
         <item>low</item>
     </string-array>
-    <string-array name="cache_entries">
+    <string-array name="cache_entries" translatable="false">
         <item>50 MB</item>
         <item>100 MB</item>
         <item>500 MB</item>
         <item>1000 MB</item>
     </string-array>
-    <string-array name="cache_values">
+    <string-array name="cache_values" translatable="false">
         <item>50</item>
         <item>100</item>
         <item>500</item>

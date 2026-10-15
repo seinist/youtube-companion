@@ -1,5 +1,7 @@
 package de.uni.youtubeaa.car.hybrid
 
+import de.uni.youtubeaa.car.AppText
+import de.uni.youtubeaa.car.R
 import de.uni.youtubeaa.car.SharedHttp
 
 import android.util.Log
@@ -37,10 +39,7 @@ class YtTvAuthClient(
     suspend fun resolveClientIdentity(): ClientIdentity = withContext(Dispatchers.IO) {
         scrapeTvClientIdentity()
             ?: configuredClientIdentity()
-            ?: throw IllegalStateException(
-                "YouTube-TV-Anmeldedaten konnten nicht geladen werden. " +
-                    "Optional YOUTUBE_TV_CLIENT_ID und YOUTUBE_TV_CLIENT_SECRET in gradle.properties setzen."
-            )
+            ?: throw IllegalStateException(AppText.get(R.string.auth_error_client_identity))
     }
 
     private fun configuredClientIdentity(): ClientIdentity? {
@@ -84,7 +83,7 @@ class YtTvAuthClient(
             }
         } catch (e: UnknownHostException) {
             throw IllegalStateException(
-                "DNS: Host nicht erreichbar (${e.message}). Prüfe Internet/VPN/DNS — Login nutzt nur youtube.com.",
+                AppText.get(R.string.auth_error_dns, e.message.orEmpty()),
                 e
             )
         }
@@ -111,18 +110,18 @@ class YtTvAuthClient(
                 null
             }
             onStatus?.invoke(
-                if (result == null) "DNS kurz nicht erreichbar, versuche weiter… ($attempts)"
-                else "Warte auf Bestätigung… ($attempts)"
+                if (result == null) AppText.get(R.string.auth_status_dns_retry, attempts)
+                else AppText.get(R.string.auth_status_waiting, attempts)
             )
             val outcome = result ?: PollResult.Pending
             when (outcome) {
                 is PollResult.Pending -> Unit
                 is PollResult.SlowDown -> intervalMs += 2000L
-                is PollResult.Denied -> throw IllegalStateException("Login abgebrochen: ${outcome.reason}")
+                is PollResult.Denied -> throw IllegalStateException(AppText.get(R.string.auth_error_denied, outcome.reason))
                 is PollResult.Success -> return@withContext outcome.tokens
             }
         }
-        throw IllegalStateException("Login-Timeout — Code abgelaufen. Bitte erneut „Code anfordern“.")
+        throw IllegalStateException(AppText.get(R.string.auth_error_timeout))
     }
 
     private fun pollOnce(deviceCode: String, client: ClientIdentity): PollResult {
@@ -162,9 +161,7 @@ class YtTvAuthClient(
         val access = json.getString("access_token")
         val refresh = json.optString("refresh_token")
         if (refresh.isBlank()) {
-            return PollResult.Denied(
-                "Kein refresh_token — in Google-Konto → Sicherheit → Drittanbieter-Zugriff widerrufen, dann neu versuchen"
-            )
+            return PollResult.Denied(AppText.get(R.string.auth_error_no_refresh_token))
         }
         val expiresIn = json.optLong("expires_in", 3600L)
         return PollResult.Success(
@@ -271,7 +268,7 @@ class YtTvAuthClient(
             http.newCall(request).execute().use { response ->
                 val text = response.body?.string().orEmpty()
                 if (!response.isSuccessful) {
-                    throw IllegalStateException("Token-Refresh fehlgeschlagen: HTTP ${response.code} $text")
+                    throw IllegalStateException(AppText.get(R.string.auth_error_refresh_failed, response.code, text))
                 }
                 val json = JSONObject(text)
                 val expiresIn = json.optLong("expires_in", 3600L)
@@ -281,7 +278,7 @@ class YtTvAuthClient(
                 )
             }
         } catch (e: UnknownHostException) {
-            throw IllegalStateException("DNS: youtube.com nicht auflösbar beim Token-Refresh.", e)
+            throw IllegalStateException(AppText.get(R.string.auth_error_refresh_dns), e)
         }
     }
 
