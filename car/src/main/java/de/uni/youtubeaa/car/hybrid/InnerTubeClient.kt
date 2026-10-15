@@ -1,7 +1,9 @@
 @file:Suppress("DEPRECATION")
 package de.uni.youtubeaa.car.hybrid
 
+import de.uni.youtubeaa.car.AppText
 import de.uni.youtubeaa.car.HeadUnitDiagnostics
+import de.uni.youtubeaa.car.R
 import de.uni.youtubeaa.car.SharedHttp
 
 import android.net.Uri
@@ -56,7 +58,7 @@ class InnerTubeClient(
         // FeedPager reports a failed fetch instead of throwing. A failed first page must still
         // surface as an error, or the facade caches an empty list as success and never falls
         // back to the legacy login (stale TV session, network loss).
-        if (snapshot.items.isEmpty() && snapshot.partial) error("Abo-Kanäle konnten nicht geladen werden")
+        if (snapshot.items.isEmpty() && snapshot.partial) error(AppText.get(R.string.browse_error_subscription_channels))
         snapshot.items
     }
 
@@ -74,7 +76,7 @@ class InnerTubeClient(
     /** Home pages like the subscriptions feed; [loadMore] continues the session already open. */
     suspend fun getHomeFeed(loadMore: Boolean = false): HomePage = withContext(Dispatchers.IO) {
         homeMutex.withLock {
-            val account = sessionStore.getTokens()?.refreshToken ?: error("Nicht angemeldet")
+            val account = sessionStore.getTokens()?.refreshToken ?: error(AppText.get(R.string.account_not_signed_in))
             // Never continue another account's recommendations after a switch.
             val session = homeSession?.takeIf { loadMore && it.account == account } ?: HomeSession(
                 account,
@@ -88,13 +90,13 @@ class InnerTubeClient(
                         )
                     }
                 ) { token ->
-                    check(sessionStore.getTokens()?.refreshToken == account) { "Konto wurde gewechselt" }
+                    check(sessionStore.getTokens()?.refreshToken == account) { AppText.get(R.string.account_switched) }
                     val json = if (token == null) browse("FEwhat_to_watch") else browseContinuation(token)
                     FeedPager.Page(parseVideos(json), InnerTubeFeedParser.continuations(json))
                 }
             ).also { homeSession = it }
             val snapshot = session.pager.load(1)
-            check(sessionStore.getTokens()?.refreshToken == account) { "Konto wurde gewechselt" }
+            check(sessionStore.getTokens()?.refreshToken == account) { AppText.get(R.string.account_switched) }
             HomePage(snapshot.items, snapshot.hasMore, snapshot.partial)
         }
     }
@@ -147,7 +149,7 @@ class InnerTubeClient(
         chipToken: String? = null
     ): SubscriptionPage = withContext(Dispatchers.IO) {
         subscriptionMutex.withLock {
-            val account = sessionStore.getTokens()?.refreshToken ?: error("Nicht angemeldet")
+            val account = sessionStore.getTokens()?.refreshToken ?: error(AppText.get(R.string.account_not_signed_in))
             // Only the ANDROID feed: merging the TV client's feed added cards at guessed positions.
             val clients = listOf(CHIP_CLIENT)
             // Sessions of another account are useless and must not be continued.
@@ -169,7 +171,7 @@ class InnerTubeClient(
                             )
                         }
                     ) { token ->
-                        check(sessionStore.getTokens()?.refreshToken == account) { "Konto wurde gewechselt" }
+                        check(sessionStore.getTokens()?.refreshToken == account) { AppText.get(R.string.account_switched) }
                         val continuation = token ?: chipToken
                         val json = if (continuation == null) {
                             try {
@@ -185,7 +187,7 @@ class InnerTubeClient(
                         } else {
                             browseContinuation(continuation, pageClient, visitorData)
                         }
-                        check(sessionStore.getTokens()?.refreshToken == account) { "Konto wurde gewechselt" }
+                        check(sessionStore.getTokens()?.refreshToken == account) { AppText.get(R.string.account_switched) }
                         visitorData = json.optJSONObject("responseContext")?.optString("visitorData")
                             ?.takeIf { it.isNotBlank() } ?: visitorData
                         if (pageClient == CHIP_CLIENT) {
@@ -199,7 +201,7 @@ class InnerTubeClient(
             // it doubled the time before anything appeared. Remaining tokens serve Load more.
             // The clients are independent requests and run in parallel.
             val pages = coroutineScope { session.pagers.map { async { it.load(1) } }.awaitAll() }
-            check(sessionStore.getTokens()?.refreshToken == account) { "Konto wurde gewechselt" }
+            check(sessionStore.getTokens()?.refreshToken == account) { AppText.get(R.string.account_switched) }
             // YouTube's own order stays; cards only the other client knows are fitted in by age.
             // New cards are appended behind those already shown, so neither a refresh nor
             // "load more" reshuffles rows (the car restores its scroll position by index).
@@ -210,7 +212,7 @@ class InnerTubeClient(
                 dateOf = { it.publishedAtMs() }
             ).forEach { item -> session.items[item.mediaId.orEmpty()] = item }
             val items = session.items.values.toList()
-            if (items.isEmpty() && pages.all { it.partial }) error("Abo-Feed konnte nicht geladen werden")
+            if (items.isEmpty() && pages.all { it.partial }) error(AppText.get(R.string.browse_error_subscription_feed))
             SubscriptionPage(items, pages.any { it.hasMore }, pages.any { it.partial },
                 session.fetchedAtMs, lastChips?.takeIf { it.account == account }?.chips.orEmpty())
         }
@@ -248,7 +250,7 @@ class InnerTubeClient(
             if (!response.isSuccessful) {
                 throw IllegalStateException("InnerTube continuation failed: HTTP ${response.code} ${text.take(200)}")
             }
-            return JSONObject(text).also { check(!it.has("error")) { "YouTube hat den Feed abgelehnt" } }
+            return JSONObject(text).also { check(!it.has("error")) { AppText.get(R.string.browse_error_feed_rejected) } }
         }
     }
 
@@ -272,18 +274,27 @@ class InnerTubeClient(
             if (!response.isSuccessful) {
                 throw IllegalStateException("InnerTube browse failed: HTTP ${response.code} ${text.take(200)}")
             }
-            return JSONObject(text).also { check(!it.has("error")) { "YouTube hat den Feed abgelehnt" } }
+            return JSONObject(text).also { check(!it.has("error")) { AppText.get(R.string.browse_error_feed_rejected) } }
         }
     }
 
     private fun IllegalStateException.isHttp400(): Boolean =
         message?.startsWith("InnerTube browse failed: HTTP 400") == true
 
+    /**
+     * Feed text (filter chips, view counts, upload age) follows the app language. Only German
+     * and English: RelativeTimeText ranks cards by parsing exactly those two.
+     */
+    private fun feedLanguage(): String = if (AppText.uiLocale().language == "de") "de" else "en"
+
+    /** Region of the device, not of the app language; "DE" as before when the device has none. */
+    private fun feedRegion(): String = AppText.deviceRegion().takeIf { it.length == 2 } ?: "DE"
+
     private fun clientContext(client: ClientProfile): JSONObject = JSONObject()
         .put("clientName", client.name)
         .put("clientVersion", client.version)
-        .put("hl", "de")
-        .put("gl", "DE")
+        .put("hl", feedLanguage())
+        .put("gl", feedRegion())
         .put("userAgent", client.userAgent)
         .also { obj ->
             if (client.name == "ANDROID") {
@@ -294,11 +305,11 @@ class InnerTubeClient(
         }
 
     internal suspend fun validAccessToken(): String = tokenMutex.withLock {
-        val tokens = sessionStore.getTokens() ?: throw IllegalStateException("Nicht angemeldet")
+        val tokens = sessionStore.getTokens() ?: throw IllegalStateException(AppText.get(R.string.account_not_signed_in))
         if (!tokens.isAccessExpired()) return@withLock tokens.accessToken
         val refreshed = authClient.refresh(tokens)
         if (!sessionStore.saveIfCurrent(tokens.refreshToken, refreshed)) {
-            throw IllegalStateException("Konto wurde gewechselt")
+            throw IllegalStateException(AppText.get(R.string.account_switched))
         }
         refreshed.accessToken
     }

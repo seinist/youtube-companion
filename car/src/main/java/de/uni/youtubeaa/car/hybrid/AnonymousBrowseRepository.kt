@@ -3,7 +3,9 @@ package de.uni.youtubeaa.car.hybrid
 
 import android.net.Uri
 import android.support.v4.media.MediaDescriptionCompat
+import de.uni.youtubeaa.car.AppText
 import de.uni.youtubeaa.car.BrowseListCache
+import de.uni.youtubeaa.car.R
 import de.uni.youtubeaa.car.StreamResolver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -63,7 +65,7 @@ class AnonymousBrowseRepository {
         val tabs = channel.tabs
         if (tabs.isEmpty()) return@withContext emptyList()
         val videosTab = tabs.firstOrNull { ChannelTabs.VIDEOS in it.contentFilters }
-            ?: throw IllegalStateException("Der Kanal bietet keinen Video-Tab an")
+            ?: throw IllegalStateException(AppText.get(R.string.browse_error_no_video_tab))
         val tab = ServiceList.YouTube.getChannelTabExtractor(videosTab)
         tab.fetchPage()
         val items = tab.initialPage.items

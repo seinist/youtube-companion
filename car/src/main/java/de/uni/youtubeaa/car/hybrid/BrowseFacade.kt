@@ -3,7 +3,9 @@ package de.uni.youtubeaa.car.hybrid
 
 import android.content.Context
 import android.support.v4.media.MediaDescriptionCompat
+import de.uni.youtubeaa.car.AppText
 import de.uni.youtubeaa.car.BrowseListCache
+import de.uni.youtubeaa.car.R
 import de.uni.youtubeaa.car.WatchHistoryStore
 import de.uni.youtubeaa.car.VideoMetadataRefetcher
 import de.uni.youtubeaa.car.HeadUnitDiagnostics
@@ -95,7 +97,7 @@ class BrowseFacade(private val context: Context) {
             BrowseOutcome.Ok(anonymous.search(query, forceRefresh))
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            BrowseOutcome.Error(e.message ?: "Suche fehlgeschlagen")
+            BrowseOutcome.Error(e.message ?: AppText.get(R.string.browse_error_search))
         }
 
     suspend fun home(
@@ -137,7 +139,7 @@ class BrowseFacade(private val context: Context) {
                 BrowseOutcome.Ok(publicItems)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
-                BrowseOutcome.Error(e.message ?: "Startseite konnte nicht geladen werden")
+                BrowseOutcome.Error(e.message ?: AppText.get(R.string.browse_error_home))
             }
         }
 
@@ -148,7 +150,7 @@ class BrowseFacade(private val context: Context) {
             BrowseOutcome.Ok(items)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            BrowseOutcome.Error(e.message ?: "Beliebt fehlgeschlagen")
+            BrowseOutcome.Error(e.message ?: AppText.get(R.string.browse_error_popular))
         }
 
     suspend fun channelVideos(
@@ -159,7 +161,7 @@ class BrowseFacade(private val context: Context) {
             BrowseOutcome.Ok(anonymous.getChannelVideos(channelId, forceRefresh).newestFirst())
         } catch (e: Exception) {
             if (e is CancellationException) throw e
-            BrowseOutcome.Error(e.message ?: "Kanal fehlgeschlagen")
+            BrowseOutcome.Error(e.message ?: AppText.get(R.string.browse_error_channel))
         }
 
     private fun logDateCoverage(feed: String, items: List<MediaDescriptionCompat>) {
@@ -187,10 +189,10 @@ class BrowseFacade(private val context: Context) {
                 } catch (failure: Exception) {
                     if (failure is CancellationException) throw failure
                     return@withContext BrowseOutcome.Error(
-                        failure.message ?: "Abos konnten nicht geladen werden")
+                        failure.message ?: AppText.get(R.string.browse_error_subscriptions))
                 }
             }
-            BrowseOutcome.NeedsSignIn(SIGN_IN_MSG)
+            BrowseOutcome.NeedsSignIn(signInMessage())
         }
 
     suspend fun channelAvatar(channelId: String): String? = withContext(Dispatchers.IO) {
@@ -245,7 +247,7 @@ class BrowseFacade(private val context: Context) {
                     val (shorts, videos) = page.items.partition { it.isShort() }
                     val feed = videos.newestFirst()
                     logDateCoverage("subscriptions", feed)
-                    check(sessionStore.getTokens()?.refreshToken == account) { "Konto wurde gewechselt" }
+                    check(sessionStore.getTokens()?.refreshToken == account) { AppText.get(R.string.account_switched) }
                     val outcome = BrowseOutcome.Ok(feed, fromPersonal = true, hasMore = page.hasMore,
                         partial = page.partial, fetchedAtMs = page.fetchedAtMs)
                     if (chipToken == null) {
@@ -255,12 +257,12 @@ class BrowseFacade(private val context: Context) {
                     return@withLock outcome
                 } catch (failure: Exception) {
                     if (failure is CancellationException) throw failure
-                    return@withLock BrowseOutcome.Error("Abo-Feed konnte nicht geladen werden. Bitte erneut versuchen.")
+                    return@withLock BrowseOutcome.Error(AppText.get(R.string.browse_error_subscription_feed_retry))
                 }
             }
             // Without a TV session a chip token is from a previous login and cannot apply.
-            if (chipToken != null) return@withLock BrowseOutcome.Error("Filter nicht mehr verfügbar. Bitte „Alle“ wählen.")
-            BrowseOutcome.NeedsSignIn(SIGN_IN_MSG)
+            if (chipToken != null) return@withLock BrowseOutcome.Error(AppText.get(R.string.browse_error_filter_gone))
+            BrowseOutcome.NeedsSignIn(signInMessage())
         }
     }
 
@@ -269,7 +271,7 @@ class BrowseFacade(private val context: Context) {
      * feed pages, so a refresh reloads the feed; otherwise the last pages' shorts are reused.
      */
     suspend fun subscriptionShorts(forceRefresh: Boolean = false): BrowseOutcome<List<MediaDescriptionCompat>> {
-        val account = sessionStore.getTokens()?.refreshToken ?: return BrowseOutcome.NeedsSignIn(SIGN_IN_MSG)
+        val account = sessionStore.getTokens()?.refreshToken ?: return BrowseOutcome.NeedsSignIn(signInMessage())
         fun cached() = BrowseListCache.get<CachedSubscriptionFeed>(
             BrowseListCache.KEY_SUBSCRIPTION_FEED_PERSONAL, ttlMs = SUBSCRIPTION_FEED_STALE_MS
         )?.takeIf { it.account == account }
@@ -277,7 +279,7 @@ class BrowseFacade(private val context: Context) {
         return when (val feed = subscriptionFeed(forceRefresh = forceRefresh)) {
             is BrowseOutcome.Ok -> BrowseOutcome.Ok(cached()?.shorts.orEmpty(), fromPersonal = true, fetchedAtMs = feed.fetchedAtMs)
             is BrowseOutcome.NeedsSignIn -> feed
-            is BrowseOutcome.Error -> BrowseOutcome.Error("Shorts konnten nicht geladen werden. Bitte erneut versuchen.")
+            is BrowseOutcome.Error -> BrowseOutcome.Error(AppText.get(R.string.browse_error_shorts))
         }
     }
 
@@ -331,7 +333,6 @@ class BrowseFacade(private val context: Context) {
         /** How long an outdated feed may still be shown while the fresh one loads. */
         private const val SUBSCRIPTION_FEED_STALE_MS = 30 * 60_000L
 
-        const val SIGN_IN_MSG =
-            "Für Abos & persönlichen Feed: YouTube-Konto verknüpfen (TV-Code). Suche & Trends gehen anonym."
+        fun signInMessage(): String = AppText.get(R.string.browse_sign_in_required)
     }
 }

@@ -22,8 +22,8 @@ android {
         applicationId = "de.uni.youtubeaa"
         minSdk = 28
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -52,6 +52,12 @@ android {
         debug {
             isMinifyEnabled = false
         }
+    }
+
+    androidResources {
+        // The app ships English (default) and German. Dropping other languages from libraries
+        // keeps dialogs and system-provided labels in the same language as the app.
+        localeFilters += listOf("en", "de")
     }
 
     compileOptions {

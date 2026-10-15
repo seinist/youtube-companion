@@ -10,14 +10,14 @@
 [![Android Auto](https://img.shields.io/badge/Android%20Auto-Companion-4285F4)](#features)
 [![Media3](https://img.shields.io/badge/Player-Media3%20%2F%20ExoPlayer-E53935)](#features)
 [![License: GPL v3 or later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0-E5A00D)](#build)
+[![Version](https://img.shields.io/badge/Version-1.0.1-E5A00D)](#build)
 
 [![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/seinist)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/seinist)
 
 [Features](#features) · [Unterstützen](#unterstützen) · [Einrichtung](#einrichtung) · [Build](#build) · [Grenzen](#bekannte-grenzen) · [Dokumentation](docs/DOCUMENTATION.de.md)
 
-**Paket** `de.uni.youtubeaa` · **Version im Repository** `1.0.0` · **Android** ab API 28
+**Paket** `de.uni.youtubeaa` · **Version im Repository** `1.0.1` · **Android** ab API 28
 
 </div>
 
@@ -67,6 +67,7 @@ Wenn dir YouTube Companion gefällt, kannst du die Weiterentwicklung mit einem K
 - Queue, Vorheriges/Nächstes und optionales **Autoplay**
 - Geschwindigkeit von **0,25× bis 2×**
 - Auswahl von Videoqualität, Audiosprache und Audioqualität
+- App auf **Englisch und Deutsch** (folgt der Gerätesprache; App-Sprache pro App ab Android 13)
 
 </td>
 </tr>

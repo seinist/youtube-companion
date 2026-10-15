@@ -7,7 +7,7 @@ import kotlinx.coroutines.ensureActive
 /** Caller serializes access. A failed page keeps both earlier items and its retry token. */
 internal class FeedPager<T>(
     private val key: (T) -> String,
-    /** (isContinuation, error): the failure behind "Feed unvollständig" for diagnostics. */
+    /** (isContinuation, error): the failure behind "Feed incomplete" for diagnostics. */
     private val onFailure: (Boolean, Exception) -> Unit = { _, _ -> },
     private val fetch: suspend (String?) -> Page<T>
 ) {

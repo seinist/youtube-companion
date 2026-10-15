@@ -5,13 +5,13 @@
 >
 > **Ich übernehme keine Verantwortung für die Nutzung dieser App oder daraus entstehende Schäden, Unfälle oder sonstige Folgen.** Die integrierte Parkprüfung ersetzt weder die eigene Verantwortung noch die Pflicht, das Fahrzeug sicher zu führen.
 
-**App:** YouTube Companion (`de.uni.youtubeaa`) · **Version:** `1.0.0` (1) · **minSdk:** 28 · **target/compileSdk:** 37
+**App:** YouTube Companion (`de.uni.youtubeaa`) · **Version:** `1.0.1` (2) · **minSdk:** 28 · **target/compileSdk:** 37
 
 **Sprachen:** [English](DOCUMENTATION.md) · **Deutsch**
 
 [Zur README](../README.de.md)
 
-Dieses Handbuch beschreibt den implementierten Funktionsumfang von Smartphone-App, Android-Auto-Medienbrowser und Video-Projektion. Bezeichnungen und Standardwerte stammen aus den Einstellungsressourcen und dem Code. Die Dokumentation ist ein Abgleich mit dem Quellstand, kein zusätzlicher Geräte- oder Wiedergabetest.
+Dieses Handbuch beschreibt den implementierten Funktionsumfang von Smartphone-App, Android-Auto-Medienbrowser und Video-Projektion. Bezeichnungen und Standardwerte stammen aus den Einstellungsressourcen und dem Code. Die App gibt es auf Englisch (Standard) und Deutsch; dieses Handbuch nutzt die deutschen Bezeichnungen. Die Dokumentation ist ein Abgleich mit dem Quellstand, kein zusätzlicher Geräte- oder Wiedergabetest.
 
 | Tabellenspalte | Bedeutung |
 | --- | --- |
@@ -293,8 +293,8 @@ Das sind Platzhalter. Für eine installierbare Release-APK müssen Keystore, Ali
 | --- | --- |
 | `./gradlew :app:assembleDebug` | `app/build/outputs/apk/debug/app-debug.apk`, mit Debug-Schlüssel signiert |
 | `./gradlew :app:assembleRelease` | APK unter `app/build/outputs/apk/release/`; Dateiname abhängig von Signierung |
-| `./build.sh debug` | Clean-Build und Kopie nach `dist/youtube-aa-companion-debug-1.0.0.apk` |
-| `./build.sh release` | Verlangt `keystore.properties`; Kopie nach `dist/youtube-aa-companion-release-1.0.0.apk` |
+| `./build.sh debug` | Clean-Build und Kopie nach `dist/youtube-companion-debug-1.0.1.apk` |
+| `./build.sh release` | Verlangt `keystore.properties`; Kopie nach `dist/youtube-companion-release-1.0.1.apk` |
 | `./build.sh playstore` | Erzeugt ein signiertes AAB in `dist/`; keine Aussage über Store-Zulässigkeit |
 | `./build.sh all` | Debug, Release und AAB nacheinander; Standard ohne Argument |
 | `./build.sh gen-keystore` | Interaktive Schlüsselerzeugung; bricht ab, wenn der Ziel-Keystore bereits existiert |

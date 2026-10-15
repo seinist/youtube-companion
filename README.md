@@ -10,14 +10,14 @@
 [![Android Auto](https://img.shields.io/badge/Android%20Auto-Companion-4285F4)](#features)
 [![Media3](https://img.shields.io/badge/Player-Media3%20%2F%20ExoPlayer-E53935)](#features)
 [![License: GPL v3 or later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0-E5A00D)](#build)
+[![Version](https://img.shields.io/badge/Version-1.0.1-E5A00D)](#build)
 
 [![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Sponsor-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/seinist)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/seinist)
 
 [Features](#features) · [Support](#support) · [Setup](#setup) · [Build](#build) · [Limits](#known-limits) · [Documentation](docs/DOCUMENTATION.md) · [Deutsch](README.de.md)
 
-**Package** `de.uni.youtubeaa` · **Version in repository** `1.0.0` · **Android** API 28+
+**Package** `de.uni.youtubeaa` · **Version in repository** `1.0.1` · **Android** API 28+
 
 </div>
 
@@ -67,6 +67,7 @@ If you enjoy YouTube Companion, a coffee or a GitHub sponsorship helps support i
 - Queue, previous/next and optional **autoplay**
 - Playback speed from **0.25× to 2×**
 - Video quality, audio language and audio quality selection
+- App in **English and German** (follows the device language; per-app language on Android 13+)
 
 </td>
 </tr>

@@ -5,13 +5,13 @@
 >
 > **I accept no responsibility for the use of this app or any resulting damage, accidents or other consequences.** The built-in parking check does not replace your own responsibility or your duty to operate the vehicle safely.
 
-**App:** YouTube Companion (`de.uni.youtubeaa`) · **Version:** `1.0.0` (1) · **minSdk:** 28 · **target/compileSdk:** 37
+**App:** YouTube Companion (`de.uni.youtubeaa`) · **Version:** `1.0.1` (2) · **minSdk:** 28 · **target/compileSdk:** 37
 
 **Languages:** **English** · [Deutsch](DOCUMENTATION.de.md)
 
 [Back to README](../README.md)
 
-This handbook describes the implemented phone app, Android Auto media browser and video projection. Labels and defaults are based on settings resources and code. English labels below translate the current German UI; they do not imply an English app localization. This is a source review, not an additional device or playback test.
+This handbook describes the implemented phone app, Android Auto media browser and video projection. Labels and defaults are based on settings resources and code. The app is available in English (default) and German; labels below are the English UI texts, the German handbook uses the German ones. This is a source review, not an additional device or playback test.
 
 | Table column | Meaning |
 | --- | --- |
@@ -293,8 +293,8 @@ These are placeholders. An installable release APK requires a matching keystore,
 | --- | --- |
 | `./gradlew :app:assembleDebug` | `app/build/outputs/apk/debug/app-debug.apk`, signed with the debug key |
 | `./gradlew :app:assembleRelease` | APK under `app/build/outputs/apk/release/`; filename depends on signing |
-| `./build.sh debug` | Clean build and copy to `dist/youtube-aa-companion-debug-1.0.0.apk` |
-| `./build.sh release` | Requires `keystore.properties`; copy to `dist/youtube-aa-companion-release-1.0.0.apk` |
+| `./build.sh debug` | Clean build and copy to `dist/youtube-companion-debug-1.0.1.apk` |
+| `./build.sh release` | Requires `keystore.properties`; copy to `dist/youtube-companion-release-1.0.1.apk` |
 | `./build.sh playstore` | Creates a signed AAB in `dist/`; does not imply Store eligibility |
 | `./build.sh all` | Debug, release and AAB in sequence; default without an argument |
 | `./build.sh gen-keystore` | Interactive key generation; aborts if the target keystore already exists |

@@ -592,7 +592,7 @@ class YouTubeMediaSession(private val context: Context) {
             audioRequestId++
             CarPlaybackState.clear(CarPlaybackState.Owner.NATIVE_AUDIO)
             NowPlayingBus.clear(owner = nativeController)
-            updatePlaybackState(PlaybackStateCompat.STATE_ERROR, "Wiedergabefehler: ${error.message}")
+            updatePlaybackState(PlaybackStateCompat.STATE_ERROR, AppText.get(R.string.playback_error_detail, error.message.orEmpty()))
         }
     }
 
@@ -665,7 +665,7 @@ class YouTubeMediaSession(private val context: Context) {
                 if (first == null) {
                     updatePlaybackState(
                         PlaybackStateCompat.STATE_ERROR,
-                        "Keine Ergebnisse für $normalizedQuery"
+                        AppText.get(R.string.search_no_results_for, normalizedQuery)
                     )
                     return@launch
                 }

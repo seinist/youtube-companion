@@ -51,22 +51,22 @@ class SettingsCarFragment : Fragment() {
         SettingsRow(
             id = ID_DEFAULT_TAB,
             title = getString(R.string.settings_default_tab),
-            value = labelFor(settings.getDefaultTab(), DEFAULT_TAB_LABELS)
+            value = resLabelFor(settings.getDefaultTab(), DEFAULT_TAB_LABELS)
         ),
         SettingsRow(
             id = ID_BROWSE_LAYOUT,
             title = getString(R.string.settings_browse_layout),
-            value = if (settings.isCarBrowseCardsEnabled()) "Karten" else "Liste"
+            value = getString(if (settings.isCarBrowseCardsEnabled()) R.string.car_layout_cards else R.string.car_layout_list)
         ),
         SettingsRow(
             id = ID_MODE,
             title = getString(R.string.settings_playback_mode_car),
-            value = labelFor(settings.getPlaybackMode(), MODE_LABELS)
+            value = resLabelFor(settings.getPlaybackMode(), MODE_LABELS)
         ),
         SettingsRow(
             id = ID_QUALITY,
             title = getString(R.string.settings_quality),
-            value = labelFor(settings.getCarVideoQuality(), QUALITY_LABELS)
+            value = settings.getCarVideoQuality().let { if (it == "auto") getString(R.string.car_value_auto) else labelFor(it, QUALITY_LABELS) }
         ),
         SettingsRow(
             id = ID_SPEED,
@@ -76,12 +76,12 @@ class SettingsCarFragment : Fragment() {
         SettingsRow(
             id = ID_AUDIO_LANG,
             title = getString(R.string.settings_audio_language),
-            value = labelFor(settings.getAudioLanguage(), AUDIO_LANG_LABELS)
+            value = resLabelFor(settings.getAudioLanguage(), AUDIO_LANG_LABELS)
         ),
         SettingsRow(
             id = ID_AUDIO_BITRATE,
             title = getString(R.string.settings_audio_bitrate),
-            value = labelFor(settings.getAudioBitrate(), AUDIO_BITRATE_LABELS)
+            value = resLabelFor(settings.getAudioBitrate(), AUDIO_BITRATE_LABELS)
         ),
         SettingsRow(
             id = ID_BACKEND,
@@ -91,7 +91,7 @@ class SettingsCarFragment : Fragment() {
         SettingsRow(
             id = ID_SURFACE,
             title = getString(R.string.settings_surface),
-            value = labelFor(settings.getCarVideoSurface(), SURFACE_LABELS)
+            value = resLabelFor(settings.getCarVideoSurface(), SURFACE_LABELS)
         ),
         SettingsRow(
             id = ID_AUTOPLAY,
@@ -141,10 +141,13 @@ class SettingsCarFragment : Fragment() {
         return values[(i + 1) % values.size]
     }
 
-    private fun onOff(value: Boolean): String = if (value) "An" else "Aus"
+    private fun onOff(value: Boolean): String = getString(if (value) R.string.car_value_on else R.string.car_value_off)
 
     private fun labelFor(value: String, map: Map<String, String>): String =
         map[value] ?: value
+
+    private fun resLabelFor(value: String, map: Map<String, Int>): String =
+        map[value]?.let { getString(it) } ?: value
 
     private data class SettingsRow(val id: String, val title: String, val value: String)
 
@@ -204,19 +207,19 @@ class SettingsCarFragment : Fragment() {
         private const val ID_HISTORY = "history"
 
         private val DEFAULT_TAB_LABELS = mapOf(
-            "home" to "Home",
-            "subscriptions" to "Abos",
-            "subscription_feed" to "Abos",
-            "popular" to "Beliebt",
-            "history" to "Verlauf",
-            "playlist" to "Gespeichert"
+            "home" to R.string.car_tab_home,
+            "subscriptions" to R.string.car_tab_subscriptions,
+            "subscription_feed" to R.string.car_tab_subscriptions,
+            "popular" to R.string.car_tab_popular,
+            "history" to R.string.car_tab_history,
+            "playlist" to R.string.car_tab_playlist
         )
         private val MODE_LABELS = mapOf(
-            "video" to "Video",
-            "audio" to "Nur Audio"
+            "video" to R.string.player_mode_video,
+            "audio" to R.string.player_switch_to_audio
         )
+        /** Resolutions read the same in every language; only "auto" is translated. */
         private val QUALITY_LABELS = mapOf(
-            "auto" to "Auto",
             "1080" to "1080p",
             "720" to "720p",
             "480" to "480p",
@@ -225,25 +228,25 @@ class SettingsCarFragment : Fragment() {
             "144" to "144p"
         )
         private val AUDIO_LANG_LABELS = mapOf(
-            "auto" to "Auto",
-            "device" to "Gerät",
-            "original" to "Original",
-            "de" to "Deutsch",
-            "en" to "Englisch"
+            "auto" to R.string.car_value_auto,
+            "device" to R.string.car_audio_device,
+            "original" to R.string.player_audio_original,
+            "de" to R.string.player_audio_german,
+            "en" to R.string.player_audio_english
         )
         private val AUDIO_BITRATE_LABELS = mapOf(
-            "auto" to "Auto",
-            "high" to "Hoch",
-            "medium" to "Mittel",
-            "low" to "Niedrig"
+            "auto" to R.string.car_value_auto,
+            "high" to R.string.player_audio_quality_high,
+            "medium" to R.string.player_audio_quality_medium,
+            "low" to R.string.player_audio_quality_low
         )
         private val BACKEND_LABELS = mapOf(
             "exoplayer" to "ExoPlayer",
             "webview" to "WebView"
         )
         private val SURFACE_LABELS = mapOf(
-            "surface" to "SurfaceView (Performance)",
-            "texture" to "TextureView (Kompatibilität)"
+            "surface" to R.string.car_surface_performance,
+            "texture" to R.string.car_surface_compat
         )
     }
 }
