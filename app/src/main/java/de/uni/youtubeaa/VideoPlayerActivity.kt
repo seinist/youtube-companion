@@ -43,7 +43,11 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.PlayerView
 import com.google.android.material.button.MaterialButton
+import de.uni.youtubeaa.car.CarVideoPolicy
+import de.uni.youtubeaa.car.DataSaverPolicy
+import de.uni.youtubeaa.car.MeteredNetworkWatcher
 import de.uni.youtubeaa.car.NetworkPolicy
+import de.uni.youtubeaa.car.SourceLayout
 import de.uni.youtubeaa.car.NowPlayingBus
 import de.uni.youtubeaa.car.PlaybackEngine
 import de.uni.youtubeaa.car.PlaybackPresentation
@@ -115,6 +119,14 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
         get() = PlaybackEngine.sourceHasAudio
         set(value) { PlaybackEngine.sourceHasAudio = value }
 
+    /** Packaging of the prepared source (shared with the engine for background handoff). */
+    private var currentSourceLayout: SourceLayout
+        get() = PlaybackEngine.sourceLayout
+        set(value) { PlaybackEngine.sourceLayout = value }
+    /** Height of a fixed progressive itag (0 for adaptive manifests / audio). */
+    private var currentProgressiveHeight = 0
+    private var meteredWatcher: MeteredNetworkWatcher? = null
+
     private val progressTicker = object : Runnable {
         override fun run() {
             updateAudioProgressUi()
@@ -168,6 +180,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
             playIndex(queueIndex, resumePositionMs = position, forcePlay = keepPlaying)
         }
         settings = SettingsRepository(this)
+        meteredWatcher = MeteredNetworkWatcher(this) { metered -> onMeteredChanged(metered) }.also { it.start() }
         PlaybackEngine.ensureInit(this)
 
         val wantsResume = intent.getBooleanExtra(EXTRA_RESUME_SESSION, false)
@@ -295,7 +308,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
                 // to the audio source (which produces the black-player bug).
                 playIndex(queueIndex, resumePositionMs = resumePosition, forcePlay = keepPlaying, preserveSource = true)
             } else {
-                trackSelector?.let { PlayerFactory.setAudioOnly(it, isAudioOnlyMode()) }
+                trackSelector?.let { PlayerFactory.setAudioOnly(it, isAudioOnlyMode(), currentSourceLayout) }
                 updateAudioProgressUi()
                 NowPlayingBus.updatePlayback(exo.isPlaying, exo.currentPosition, exo.duration, owner = this@VideoPlayerActivity)
             }
@@ -576,10 +589,14 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
         // Video -> audio does not need a new URL or MediaSource when the currently prepared
         // source already contains audio. Disabling the video renderer keeps the audio clock and
         // buffer alive, avoiding the audible pause caused by setMediaSource()+prepare().
-        if (!wasAudioOnly && audioOnly && currentSourceHasAudioForSeamlessSwitch) {
+        // Only separate audio/video tracks stop downloading video when it is disabled; a muxed
+        // source falls through to a pure audio reload below (data saver).
+        if (!wasAudioOnly && audioOnly && currentSourceHasAudioForSeamlessSwitch &&
+            currentSourceLayout.videoCanBeDroppedForFree
+        ) {
             loadJob?.cancel()
             preserveSourcePosition = false
-            trackSelector?.let { PlayerFactory.setAudioOnly(it, true) }
+            trackSelector?.let { PlayerFactory.setAudioOnly(it, true, currentSourceLayout) }
             exo.playWhenReady = keepPlaying
             if (keepPlaying) exo.play()
             updateAudioProgressUi()
@@ -591,7 +608,10 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
         if (wasAudioOnly && !audioOnly && currentSourceHasVideo) {
             loadJob?.cancel()
             preserveSourcePosition = false
-            trackSelector?.let { PlayerFactory.setAudioOnly(it, false) }
+            trackSelector?.let {
+                PlayerFactory.setAudioOnly(it, false, currentSourceLayout)
+                applyPhoneVideoCeiling(it)
+            }
             exo.playWhenReady = keepPlaying
             if (keepPlaying) exo.play()
             return
@@ -1055,6 +1075,8 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
             player?.clearMediaItems()
             currentSourceHasVideo = false
             currentSourceHasAudioForSeamlessSwitch = false
+            currentSourceLayout = SourceLayout.AUDIO_ONLY
+            currentProgressiveHeight = 0
         }
         player?.playWhenReady = forcePlay
         playbackEndHandled = false
@@ -1110,8 +1132,10 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
                     if (result.durationMs > 0L) knownDurationMs = result.durationMs
                     currentSourceHasVideo = false
                     currentSourceHasAudioForSeamlessSwitch = true
+                    currentSourceLayout = result.layout
+                    currentProgressiveHeight = 0
                     // Set audio-only tracks before binding the new source (not on the old video).
-                    trackSelector?.let { PlayerFactory.setAudioOnly(it, true) }
+                    trackSelector?.let { PlayerFactory.setAudioOnly(it, true, result.layout) }
                     Log.d(
                         TAG,
                         "Audio source pure=${result.pureAudio} live=${result.isLive} dur=${result.durationMs}"
@@ -1140,31 +1164,37 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
             // Auto on the phone uses adaptive manifests so ABR can start low; explicit heights
             // stay on progressive itags for a predictable picture size.
             val preferAdaptive = requested.equals("auto", ignoreCase = true)
-            // Data saver: on mobile data Auto stays at 480p, also for a progressive fallback.
-            val metered = preferAdaptive && NetworkPolicy.isMetered(this@VideoPlayerActivity)
-            val quality = if (metered) "480" else requested
+            // Data saver: Auto stops at 720p30; on mobile data the user's cap (default 480p)
+            // limits every setting, explicit qualities and a progressive fallback included.
+            val metered = meteredWatcher?.isMetered ?: NetworkPolicy.isMetered(this@VideoPlayerActivity)
+            val mobileQuality = settings.getMobileDataQuality()
+            val quality = DataSaverPolicy.phoneResolveQuality(requested, metered, mobileQuality)
             trackSelector?.let {
                 PlayerFactory.setAudioOnly(it, false)
-                if (preferAdaptive) PlayerFactory.applyPhoneAdaptiveAutoCeiling(it, metered)
-                else PlayerFactory.clearPhoneAdaptiveCeiling(it)
+                PlayerFactory.applyPhoneVideoCeiling(it, DataSaverPolicy.phoneCeiling(requested, metered, mobileQuality))
             }
             when (
                 val result = streamResolver.resolveVideoStream(
                     videoId,
                     quality,
                     audioPrefs(),
+                    maxFps = DataSaverPolicy.phoneResolveMaxFps(requested),
                     preferAdaptive = preferAdaptive
                 )
             ) {
                 is StreamResolver.VideoResult.Muxed -> {
                     currentSourceHasVideo = true
                     currentSourceHasAudioForSeamlessSwitch = true
+                    currentSourceLayout = SourceLayout.MUXED_PROGRESSIVE
+                    currentProgressiveHeight = result.height
                     playResolvedSource(result.url, resumePositionMs, playWhenReady = player?.playWhenReady ?: playWhenReady)
                 }
                 is StreamResolver.VideoResult.Manifest -> {
                     currentIsLive = result.isLive
                     currentSourceHasVideo = true
                     currentSourceHasAudioForSeamlessSwitch = true
+                    currentSourceLayout = result.layout
+                    currentProgressiveHeight = 0
                     playResolvedSource(
                         result.url,
                         resumePositionMs,
@@ -1178,6 +1208,8 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
                     val audioUrl = result.audioUrl
                     currentSourceHasVideo = true
                     currentSourceHasAudioForSeamlessSwitch = audioUrl != null
+                    currentSourceLayout = SourceLayout.SEPARATE
+                    currentProgressiveHeight = result.height
                     val source = if (audioUrl != null) {
                         PlaybackSources.merged(result.videoUrl, audioUrl)
                     } else {
@@ -1194,6 +1226,30 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
                 }
                 is StreamResolver.VideoResult.Error -> showPlaybackError(result.message)
             }
+        }
+    }
+
+    private fun applyPhoneVideoCeiling(selector: DefaultTrackSelector, metered: Boolean = meteredWatcher?.isMetered ?: NetworkPolicy.isMetered(this)) {
+        PlayerFactory.applyPhoneVideoCeiling(
+            selector,
+            DataSaverPolicy.phoneCeiling(settings.getVideoQuality(), metered, settings.getMobileDataQuality())
+        )
+    }
+
+    /**
+     * Wi-Fi <-> mobile data during playback. Adaptive manifests follow the new ceiling through
+     * the TrackSelector without a reload; a fixed progressive itag above the new cap is reloaded
+     * at the current position (once: the reload picks an itag within the cap).
+     */
+    private fun onMeteredChanged(metered: Boolean) {
+        if (isFinishing || isDestroyed || !VideoSessionBridge.isOwner(this)) return
+        if (isAudioOnlyMode() || !currentSourceHasVideo) return
+        trackSelector?.let { applyPhoneVideoCeiling(it, metered) }
+        if (!metered || currentProgressiveHeight <= 0) return
+        val capped = DataSaverPolicy.phoneResolveQuality(settings.getVideoQuality(), true, settings.getMobileDataQuality())
+        if (currentProgressiveHeight > CarVideoPolicy.qualityShortSide(capped)) {
+            Log.i(TAG, "metered network: reloading progressive ${currentProgressiveHeight}p within the mobile-data cap")
+            reloadCurrent(keepPosition = true)
         }
     }
 
@@ -1402,7 +1458,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
             if (!isAudioOnlyMode() && !currentSourceHasVideo) {
                 playIndex(queueIndex, PlaybackEngine.getPositionMs().coerceAtLeast(0L), exo.playWhenReady, preserveSource = true)
             } else {
-                trackSelector?.let { PlayerFactory.setAudioOnly(it, isAudioOnlyMode()) }
+                trackSelector?.let { PlayerFactory.setAudioOnly(it, isAudioOnlyMode(), currentSourceLayout) }
             }
             applyModeUi()
         }
@@ -1433,6 +1489,8 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
 
     override fun onDestroy() {
         saveHistoryProgress()
+        meteredWatcher?.stop()
+        meteredWatcher = null
         if (screenOffReceiverRegistered) {
             unregisterReceiver(screenOffReceiver)
             screenOffReceiverRegistered = false

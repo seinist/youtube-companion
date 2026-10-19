@@ -44,6 +44,8 @@ object PlaybackEngine : VideoSessionBridge.Controller {
     var currentIsLive: Boolean = false
     var sourceHasVideo = false
     var sourceHasAudio = false
+    /** Packaging of the prepared source; only separate tracks may drop video for free. */
+    var sourceLayout: SourceLayout = SourceLayout.AUDIO_ONLY
     var knownDurationMs = 0L
     private var pendingPositionMs = 0L
     fun isResolving(): Boolean = loadJob?.isActive == true
@@ -207,9 +209,12 @@ object PlaybackEngine : VideoSessionBridge.Controller {
 
     /**
      * Hands an active phone-video session to the process-wide engine as audio-only playback.
-     * If the current source already carries audio (muxed/manifest/merged), disabling video tracks
-     * is instant and preserves the exact buffered position. If it does not, resolve a pure audio
-     * stream headlessly and resume from the same position.
+     * Only when the current source keeps audio and video apart (DASH / merged separate
+     * progressive streams) is disabling the video track enough: that is instant and preserves the
+     * buffered position. A muxed source (HLS variants, itag 18) would keep downloading the
+     * picture at full bitrate in the background, so it is replaced by a true audio-only stream
+     * (~1 MB/min) resolved headlessly from the same position. Reopening the player restores
+     * video from [sourceHasVideo] == false.
      */
     fun handoffToBackgroundAudio(
         positionMs: Long,
@@ -225,17 +230,26 @@ object PlaybackEngine : VideoSessionBridge.Controller {
         VideoSessionBridge.register(this, VideoSessionBridge.Role.PHONE)
         startTicker()
 
-        if (currentSourceHasAudio && player.mediaItemCount > 0) {
+        if (currentSourceHasAudio && sourceLayout.videoCanBeDroppedForFree && player.mediaItemCount > 0) {
             loadJob?.cancel()
-            PlayerFactory.setAudioOnly(trackSelector, true)
+            PlayerFactory.setAudioOnly(trackSelector, true, sourceLayout)
             player.playWhenReady = keepPlaying
             if (keepPlaying) player.play()
             NowPlayingBus.updatePlayback(player.isPlaying || keepPlaying, player.currentPosition, player.duration, owner = this@PlaybackEngine)
             return
         }
 
+        HeadUnitDiagnostics.event(
+            "PlaybackEngine",
+            "background-audio re-resolve layout=$sourceLayout hasAudio=$currentSourceHasAudio videoId=$videoId"
+        )
         val settings = SettingsRepository(appContext)
         loadJob?.cancel()
+        // The video source is about to be replaced: a returning Activity must re-resolve video
+        // instead of re-enabling a track that will be gone. Until then, keep the old source's
+        // audio running without decoding its picture.
+        sourceHasVideo = false
+        if (player.mediaItemCount > 0) PlayerFactory.setAudioOnly(trackSelector, true)
         player.playWhenReady = keepPlaying
         loadJob = engineScope.launch {
             val prefs = StreamResolver.AudioPrefs(
@@ -247,16 +261,19 @@ object PlaybackEngine : VideoSessionBridge.Controller {
                     currentIsLive = result.isLive
                     sourceHasVideo = false
                     sourceHasAudio = true
+                    sourceLayout = result.layout
                     knownDurationMs = result.durationMs
-                    PlayerFactory.setAudioOnly(trackSelector, true)
+                    // The old source kept playing during the resolve; continue from where it is.
+                    val resumeAt = if (player.mediaItemCount > 0) player.currentPosition else positionMs
+                    PlayerFactory.setAudioOnly(trackSelector, true, result.layout)
                     PlayerFactory.replaceSource(
                         player = player,
                         source = PlaybackSources.mediaSource(result.streamUrl),
-                        resumePositionMs = positionMs.coerceAtLeast(0L),
+                        resumePositionMs = resumeAt.coerceAtLeast(0L),
                         isLive = result.isLive,
                         playWhenReady = player.playWhenReady
                     )
-                    NowPlayingBus.updatePlayback(player.isPlaying, positionMs.coerceAtLeast(0L), result.durationMs, owner = this@PlaybackEngine)
+                    NowPlayingBus.updatePlayback(player.isPlaying, resumeAt.coerceAtLeast(0L), result.durationMs, owner = this@PlaybackEngine)
                 }
                 is StreamResolver.Result.Error -> {
                     // Keep the previous item paused rather than clearing the session entirely.
@@ -323,7 +340,8 @@ object PlaybackEngine : VideoSessionBridge.Controller {
                     sourceHasVideo = false
                     sourceHasAudio = true
                     knownDurationMs = result.durationMs
-                    PlayerFactory.setAudioOnly(trackSelector, true)
+                    sourceLayout = result.layout
+                    PlayerFactory.setAudioOnly(trackSelector, true, result.layout)
                     PlayerFactory.replaceSource(
                         player = player,
                         source = PlaybackSources.mediaSource(result.streamUrl),
@@ -381,6 +399,7 @@ object PlaybackEngine : VideoSessionBridge.Controller {
         currentIsLive = false
         sourceHasVideo = false
         sourceHasAudio = false
+        sourceLayout = SourceLayout.AUDIO_ONLY
         if (VideoSessionBridge.activeRole == VideoSessionBridge.Role.PHONE) {
             NowPlayingBus.clear(owner = VideoSessionBridge.controller)
         }
@@ -534,7 +553,8 @@ object PlaybackEngine : VideoSessionBridge.Controller {
                     sourceHasVideo = false
                     sourceHasAudio = true
                     knownDurationMs = result.durationMs
-                    PlayerFactory.setAudioOnly(trackSelector, true)
+                    sourceLayout = result.layout
+                    PlayerFactory.setAudioOnly(trackSelector, true, result.layout)
                     PlayerFactory.replaceSource(
                         player = player,
                         source = PlaybackSources.mediaSource(result.streamUrl),

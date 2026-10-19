@@ -425,6 +425,9 @@ class YouTubeMediaSession(private val context: Context) {
                 is StreamResolver.Result.Success -> {
                     if (requestId != audioRequestId) return@launch
                     nativeCurrentIsLive = result.isLive
+                    // A muxed HLS fallback (live) is pinned to its lowest rung; a pure audio URL
+                    // or DASH just keeps the video track disabled.
+                    PlayerFactory.setAudioOnly(nativeHandle.trackSelector, true, result.layout)
                     exoPlayer.setMediaSource(PlaybackSources.mediaSource(result.streamUrl))
                     exoPlayer.prepare()
                     if (resumePositionMs > 0L && !result.isLive) {
