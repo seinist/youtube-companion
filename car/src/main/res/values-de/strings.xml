@@ -33,6 +33,7 @@
     <string name="car_settings_title">Einstellungen</string>
     <string name="car_settings_hint">Tippen wechselt den Wert (gilt auch für die Handy-App)</string>
     <string name="settings_quality">Video-Auflösung</string>
+    <string name="settings_mobile_quality">Qualität bei mobilen Daten</string>
     <string name="settings_speed">Geschwindigkeit</string>
     <string name="settings_audio_language">Audiosprache</string>
     <string name="settings_audio_bitrate">Audio-Bitrate</string>
@@ -114,6 +115,7 @@
 
     <!-- Werte der Android-Auto-Einstellungen -->
     <string name="car_value_auto">Auto</string>
+    <string name="car_value_no_limit">Keine Begrenzung</string>
     <string name="car_value_on">An</string>
     <string name="car_value_off">Aus</string>
     <string name="car_layout_cards">Karten</string>

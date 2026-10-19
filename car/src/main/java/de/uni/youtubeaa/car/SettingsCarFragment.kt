@@ -69,6 +69,13 @@ class SettingsCarFragment : Fragment() {
             value = settings.getCarVideoQuality().let { if (it == "auto") getString(R.string.car_value_auto) else labelFor(it, QUALITY_LABELS) }
         ),
         SettingsRow(
+            id = ID_MOBILE_QUALITY,
+            title = getString(R.string.settings_mobile_quality),
+            value = settings.getMobileDataQuality().let {
+                if (it == DataSaverPolicy.UNLIMITED) getString(R.string.car_value_no_limit) else labelFor(it, QUALITY_LABELS)
+            }
+        ),
+        SettingsRow(
             id = ID_SPEED,
             title = getString(R.string.settings_speed),
             value = "${settings.getPlaybackSpeed()}×"
@@ -120,6 +127,7 @@ class SettingsCarFragment : Fragment() {
             ID_DEFAULT_TAB -> settings.setDefaultTab(nextDefaultTab(settings.getDefaultTab()))
             ID_BROWSE_LAYOUT -> settings.setCarBrowseCardsEnabled(!settings.isCarBrowseCardsEnabled())
             ID_QUALITY -> settings.cycleCarVideoQuality()
+            ID_MOBILE_QUALITY -> settings.cycleMobileDataQuality()
             ID_SPEED -> settings.cyclePlaybackSpeed()
             ID_MODE -> settings.cyclePlaybackMode()
             ID_AUDIO_LANG -> settings.cycleAudioLanguage()
@@ -195,6 +203,7 @@ class SettingsCarFragment : Fragment() {
         private const val ID_DEFAULT_TAB = "default_tab"
         private const val ID_BROWSE_LAYOUT = "browse_layout"
         private const val ID_QUALITY = "quality"
+        private const val ID_MOBILE_QUALITY = "mobile_quality"
         private const val ID_SPEED = "speed"
         private const val ID_MODE = "mode"
         private const val ID_AUDIO_LANG = "audio_lang"

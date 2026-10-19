@@ -41,6 +41,13 @@
             android:summary="@string/pref_car_quality_summary"
             app:useSimpleSummaryProvider="true" />
         <ListPreference
+            android:key="mobile_data_quality"
+            android:title="@string/pref_mobile_quality"
+            android:entries="@array/mobile_quality_entries"
+            android:entryValues="@array/mobile_quality_values"
+            android:defaultValue="480"
+            android:summary="@string/pref_mobile_quality_summary" />
+        <ListPreference
             android:key="playback_speed"
             android:title="@string/pref_default_speed"
             android:entries="@array/playback_speed_entries"
@@ -126,6 +133,9 @@
             android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_category_diagnostics">
+        <Preference
+            android:key="playback_data_usage"
+            android:title="@string/pref_data_usage" />
         <Preference
             android:key="share_head_unit_logs"
             android:title="@string/pref_share_hu_logs"

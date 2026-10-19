@@ -139,6 +139,13 @@
     <string name="pref_phone_quality">Videoqualität auf dem Handy</string>
     <string name="pref_car_quality">Video-Auflösung im Auto</string>
     <string name="pref_car_quality_summary">Standardqualität für den Head-Player</string>
+    <string name="pref_mobile_quality">Qualität bei mobilen Daten</string>
+    <string name="pref_mobile_quality_summary">Obergrenze in getakteten Netzen (Mobilfunk, Hotspot) für Handy und Auto, auch bei fester Qualität: %s</string>
+    <string name="pref_data_usage">Datenverbrauch der Wiedergabe</string>
+    <string name="pref_data_usage_summary">Mobile Daten: %1$s · WLAN/ungetaktet: %2$s\nVideo %3$s · Audio %4$s · Gemischt %5$s · Sonstiges %6$s\nSeit %7$s. Tippen zum Zurücksetzen.</string>
+    <string name="data_usage_reset_title">Datenverbrauch zurücksetzen?</string>
+    <string name="data_usage_reset_message">Die Byte-Zähler der Wiedergabe beginnen wieder bei null.</string>
+    <string name="data_usage_reset">Zurücksetzen</string>
     <string name="pref_default_speed">Standard-Geschwindigkeit</string>
     <string name="pref_default_mode">Standard-Wiedergabemodus</string>
     <string name="pref_default_mode_summary">Video oder nur Audio (im Player umschaltbar)</string>

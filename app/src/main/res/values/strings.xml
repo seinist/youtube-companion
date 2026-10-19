@@ -153,6 +153,13 @@
     <string name="pref_phone_quality">Video quality on phone</string>
     <string name="pref_car_quality">Video resolution in the car</string>
     <string name="pref_car_quality_summary">Default quality for the head unit player</string>
+    <string name="pref_mobile_quality">Quality on mobile data</string>
+    <string name="pref_mobile_quality_summary">Upper limit on metered networks (mobile data, hotspot) for phone and car, also for fixed qualities: %s</string>
+    <string name="pref_data_usage">Playback data usage</string>
+    <string name="pref_data_usage_summary">Mobile data: %1$s · Wi-Fi/unmetered: %2$s\nVideo %3$s · Audio %4$s · Muxed %5$s · Other %6$s\nSince %7$s. Tap to reset.</string>
+    <string name="data_usage_reset_title">Reset data usage?</string>
+    <string name="data_usage_reset_message">The playback byte counters start again from zero.</string>
+    <string name="data_usage_reset">Reset</string>
     <string name="pref_default_speed">Default speed</string>
     <string name="pref_default_mode">Default playback mode</string>
     <string name="pref_default_mode_summary">Video or audio only (can be switched in the player)</string>
