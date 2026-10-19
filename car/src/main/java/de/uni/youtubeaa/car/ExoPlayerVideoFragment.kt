@@ -551,7 +551,7 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
         // YouTube item here used to cause the short pause during video -> audio switching.
         // Muxed sources keep downloading video with a disabled track: reload pure audio instead.
         if (!wasAudioOnly && audioOnly && currentSourceHasAudioForSeamlessSwitch &&
-            currentSourceLayout.videoCanBeDroppedForFree
+            trackSelector?.let { PlayerFactory.effectiveLayout(it, currentSourceLayout) }?.videoCanBeDroppedForFree == true
         ) {
             loadJob?.cancel()
             preserveSourcePosition = false
@@ -812,13 +812,14 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
     }
 
     /**
-     * Projection hidden but audio continues. Separate tracks just disable video; a muxed HLS
-     * source is pinned to its lowest rung instead (a disabled track would keep downloading the
-     * last rung), which needs the HW manifest override out of the way until resume.
+     * Projection hidden but audio continues. Separate tracks (incl. YouTube HLS with audio
+     * renditions) just disable video; a truly muxed HLS source (or one whose manifest is not
+     * loaded yet) is pinned to its lowest rung instead, which needs the HW manifest override out
+     * of the way until resume.
      */
     private fun suspendHiddenVideo() {
         val selector = trackSelector ?: return
-        if (currentSourceLayout == SourceLayout.MUXED_MANIFEST) {
+        if (PlayerFactory.effectiveLayout(selector, currentSourceLayout).needsLowestPin) {
             PlayerFactory.clearVideoTrackOverride(selector)
             manifestHardwareOverrideKey = null
         }

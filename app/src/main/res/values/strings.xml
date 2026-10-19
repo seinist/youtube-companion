@@ -163,6 +163,10 @@
     <string name="pref_network_usage">Network data usage (whole app)</string>
     <string name="pref_network_usage_summary">App total (Android counter): mobile %1$s · Wi-Fi/unmetered %2$s\nRequests: search %3$s · feeds %4$s · images %5$s · stream lookup %6$s · other %7$s\nCounted while the app runs; compare with Android\'s per-app usage.</string>
     <string name="pref_network_usage_unsupported">not available on this device</string>
+    <string name="pref_back_stops_playback">Back stops video playback</string>
+    <string name="pref_back_stops_playback_summary">Leaving a video with Back ends playback. Home and screen off keep playing as background audio; audio mode is not affected.</string>
+    <string name="pref_live_auto_stop">Stop background live streams</string>
+    <string name="pref_live_auto_stop_summary">A live stream never ends on its own. Stops background playback after this time without interaction: %s</string>
     <string name="pref_default_speed">Default speed</string>
     <string name="pref_default_mode">Default playback mode</string>
     <string name="pref_default_mode_summary">Video or audio only (can be switched in the player)</string>

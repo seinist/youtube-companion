@@ -21,6 +21,18 @@
             android:summary="@string/pref_autoplay_summary"
             android:defaultValue="false" />
         <SwitchPreferenceCompat
+            android:key="back_stops_playback"
+            android:title="@string/pref_back_stops_playback"
+            android:summary="@string/pref_back_stops_playback_summary"
+            android:defaultValue="true" />
+        <ListPreference
+            android:key="live_auto_stop"
+            android:title="@string/pref_live_auto_stop"
+            android:entries="@array/live_auto_stop_entries"
+            android:entryValues="@array/live_auto_stop_values"
+            android:defaultValue="60"
+            android:summary="@string/pref_live_auto_stop_summary" />
+        <SwitchPreferenceCompat
             android:key="phone_audio_only"
             android:title="@string/pref_phone_audio_first"
             android:summary="@string/pref_phone_audio_first_summary"

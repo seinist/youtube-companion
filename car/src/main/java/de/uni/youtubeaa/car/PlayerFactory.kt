@@ -5,11 +5,14 @@ import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.Format
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLivePlaybackSpeedControl
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.LoadControl
+import androidx.media3.exoplayer.hls.HlsManifest
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 
@@ -68,23 +71,64 @@ object PlayerFactory {
             .setLivePlaybackSpeedControl(liveSpeedControl)
             .setAudioAttributes(audioAttributes, /* handleAudioFocus= */ true)
             .setHandleAudioBecomingNoisy(true)
-            // Requires WAKE_LOCK in the merging app manifest.
-            .setWakeMode(C.WAKE_MODE_LOCAL)
+            // CPU + Wi-Fi lock while playing (requires WAKE_LOCK in the merging app manifest).
+            // With only the CPU lock, screen-off background audio could drop Wi-Fi and silently
+            // continue on mobile data.
+            .setWakeMode(C.WAKE_MODE_NETWORK)
             // Matches YouTube's 10s skip; used by Player.seekBack()/seekForward() (rew/ffwd
             // buttons in the custom PlayerControlView layouts).
             .setSeekBackIncrementMs(10_000)
             .setSeekForwardIncrementMs(10_000)
             .build()
+        val tracker = LayoutTracker()
+        synchronized(layoutTrackers) { layoutTrackers[trackSelector] = tracker }
+        player.addListener(object : Player.Listener {
+            override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+                val detected = (player.currentManifest as? HlsManifest)?.let { manifest ->
+                    HlsLayout.classify(manifest.multivariantPlaylist.audios.map { it.url?.toString() })
+                }
+                if (detected == tracker.detected) return
+                tracker.detected = detected
+                if (detected == null) return
+                HeadUnitDiagnostics.event(diagnosticTag, "hls-layout detected=$detected")
+                // Re-run the last audio-only/suspend request that was made before the manifest
+                // was known (YouTube: pinned 144p becomes a plain disabled video track).
+                tracker.reapply?.invoke()
+            }
+        })
         PlaybackDiagnostics.attach(
             player,
             if (carLipSync != null) "HeadUnitPlayer" else diagnosticTag,
             appContext,
             onVideoDecoderStarted,
             videoExpectationProvider,
-            onDroppedVideoFrames
+            onDroppedVideoFrames,
+            hlsVariantsAreVideoOnly = { tracker.detected == SourceLayout.SEPARATE }
         )
         return Handle(player, trackSelector)
     }
+
+    /**
+     * Per-player HLS layout found in the loaded multivariant playlist, plus the last
+     * audio-only/suspend request made with [SourceLayout.HLS_PENDING] so it can be re-applied
+     * with the real layout as soon as the manifest is known (main thread, player listener).
+     */
+    private class LayoutTracker {
+        @Volatile var detected: SourceLayout? = null
+        var reapply: (() -> Unit)? = null
+    }
+
+    private val layoutTrackers = java.util.WeakHashMap<DefaultTrackSelector, LayoutTracker>()
+
+    private fun trackerOf(trackSelector: DefaultTrackSelector): LayoutTracker? =
+        synchronized(layoutTrackers) { layoutTrackers[trackSelector] }
+
+    /**
+     * The layout to base decisions on: a [SourceLayout.HLS_PENDING] source takes the layout read
+     * from Media3's loaded manifest (YouTube: [SourceLayout.SEPARATE]); other layouts are kept.
+     */
+    fun effectiveLayout(trackSelector: DefaultTrackSelector, declared: SourceLayout): SourceLayout =
+        HlsLayout.refine(declared, trackerOf(trackSelector)?.detected)
 
     private const val MIN_BUFFER_MS = 8_000
     private const val MAX_BUFFER_MS = 30_000
@@ -197,18 +241,36 @@ object PlayerFactory {
     internal fun maxCarVideoLongSide(quality: String): Int = CarVideoPolicy.qualityLongSide(quality)
 
     /**
-     * Audio-only track selection. With a [SourceLayout.MUXED_MANIFEST] (HLS) source a disabled
-     * video track does not stop the variant download: the chunk source keeps fetching muxed
-     * segments at whatever rung it last used. There the video track stays enabled but pinned to
-     * the lowest rung (force-lowest + 256x144); the picture is never shown.
+     * Audio-only track selection. With separate audio (progressive pair, DASH, YouTube HLS with
+     * audio renditions) the video track is simply disabled and no video bytes are loaded. Only a
+     * truly muxed HLS source ([SourceLayout.MUXED_MANIFEST]) keeps the video track enabled but
+     * pinned to the lowest rung (force-lowest + 256x144), because there a disabled video track
+     * does not stop the variant download. [SourceLayout.HLS_PENDING] is pinned until the loaded
+     * manifest shows the real layout, then re-applied automatically.
      */
     fun setAudioOnly(
         trackSelector: DefaultTrackSelector,
         audioOnly: Boolean,
         layout: SourceLayout = SourceLayout.SEPARATE
     ) {
+        rememberPending(trackSelector, layout) { setAudioOnlyNow(trackSelector, audioOnly, it) }
+        setAudioOnlyNow(trackSelector, audioOnly, effectiveLayout(trackSelector, layout))
+    }
+
+    private fun rememberPending(trackSelector: DefaultTrackSelector, layout: SourceLayout, apply: (SourceLayout) -> Unit) {
+        val tracker = trackerOf(trackSelector) ?: return
+        tracker.reapply = if (layout == SourceLayout.HLS_PENDING) {
+            { apply(effectiveLayout(trackSelector, SourceLayout.HLS_PENDING)) }
+        } else null
+    }
+
+    private fun setAudioOnlyNow(
+        trackSelector: DefaultTrackSelector,
+        audioOnly: Boolean,
+        layout: SourceLayout
+    ) {
         val params = trackSelector.parameters
-        val pinLowest = audioOnly && layout == SourceLayout.MUXED_MANIFEST
+        val pinLowest = audioOnly && layout.needsLowestPin
         val disableVideo = audioOnly && !pinLowest
         // Skip no-op updates — mid-playback parameter changes can cause audible glitches.
         if (params.disabledTrackTypes.contains(C.TRACK_TYPE_VIDEO) == disableVideo &&
@@ -225,7 +287,7 @@ object PlayerFactory {
 
     /**
      * Temporarily stop video decode/render while keeping audio playback alive in the background.
-     * Muxed HLS sources are pinned to the lowest rung instead (see [setAudioOnly]). Callers
+     * Truly muxed HLS sources are pinned to the lowest rung instead (see [setAudioOnly]). Callers
      * re-apply their video constraints before resuming.
      */
     fun setVideoSuspended(
@@ -233,8 +295,17 @@ object PlayerFactory {
         suspended: Boolean,
         layout: SourceLayout = SourceLayout.SEPARATE
     ) {
+        rememberPending(trackSelector, layout) { setVideoSuspendedNow(trackSelector, suspended, it) }
+        setVideoSuspendedNow(trackSelector, suspended, effectiveLayout(trackSelector, layout))
+    }
+
+    private fun setVideoSuspendedNow(
+        trackSelector: DefaultTrackSelector,
+        suspended: Boolean,
+        layout: SourceLayout
+    ) {
         val params = trackSelector.parameters
-        val pinLowest = suspended && layout == SourceLayout.MUXED_MANIFEST
+        val pinLowest = suspended && layout.needsLowestPin
         val disableVideo = suspended && !pinLowest
         if (params.disabledTrackTypes.contains(C.TRACK_TYPE_VIDEO) == disableVideo &&
             params.forceLowestBitrate == pinLowest

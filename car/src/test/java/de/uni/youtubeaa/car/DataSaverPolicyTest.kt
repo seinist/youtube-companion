@@ -68,6 +68,11 @@ class DataSaverPolicyTest {
         assertTrue(SourceLayout.SEPARATE.videoCanBeDroppedForFree)
         assertFalse(SourceLayout.MUXED_PROGRESSIVE.videoCanBeDroppedForFree)
         assertFalse(SourceLayout.MUXED_MANIFEST.videoCanBeDroppedForFree)
+        assertFalse(SourceLayout.HLS_PENDING.videoCanBeDroppedForFree)
+        assertTrue(SourceLayout.HLS_PENDING.needsLowestPin)
+        assertTrue(SourceLayout.MUXED_MANIFEST.needsLowestPin)
+        assertFalse(SourceLayout.SEPARATE.needsLowestPin)
+        assertFalse(SourceLayout.MUXED_PROGRESSIVE.needsLowestPin)
     }
 
     @Test fun `byte counter buckets by track type and googlevideo mime`() {

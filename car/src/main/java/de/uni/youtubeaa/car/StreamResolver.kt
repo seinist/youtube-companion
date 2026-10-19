@@ -36,6 +36,7 @@ class StreamResolver {
     companion object {
         private const val TAG = "StreamResolver"
         private const val MAX_CACHED_EXTRACTORS = 6
+        private val manifestClient by lazy { SharedHttp.builder(DataUsageStats.Subsystem.EXTRACTOR).build() }
         private const val MAX_VIDEO_CANDIDATE_LOGS = 16
         /** Signed URLs live for hours; refetch well before that so a cache hit is never stale. */
         private const val EXTRACTOR_MAX_AGE_MS = 30 * 60_000L
@@ -157,8 +158,23 @@ class StreamResolver {
                 }
             }
 
-            // Fallback: HLS/DASH manifest. Only DASH is guaranteed to keep audio and video apart;
-            // an HLS variant can carry muxed video, which callers then pin to the lowest rung.
+            // Live has no progressive audio. YouTube's HLS master lists the audio as separate
+            // renditions: playing that audio playlist directly loads no video at all (~1 MB/min
+            // instead of the 144p variant plus audio).
+            if (live) {
+                liveAudioRendition(extractor, preferLow = audioPrefs.bitrate == "low")?.let { url ->
+                    HeadUnitDiagnostics.event("StreamResolver", "audio videoId=$videoId source=hls-audio-rendition")
+                    return@withContext Result.Success(
+                        streamUrl = url,
+                        isLive = true,
+                        pureAudio = true,
+                        durationMs = durationMs
+                    )
+                }
+            }
+
+            // Fallback: HLS/DASH manifest with the video track disabled (or, for HLS that turns
+            // out to be truly muxed, pinned to the lowest rung).
             resolveManifestUrl(extractor, live)?.let {
                 return@withContext Result.Success(
                     streamUrl = it.url,
@@ -458,16 +474,34 @@ class StreamResolver {
 
     /**
      * Live: HLS first (best ExoPlayer support for YT live), then DASH.
-     * VOD: DASH first. DASH always keeps audio and video in separate adaptation sets, so
-     * disabling the video track really stops video downloads (background / audio-only). An HLS
-     * variant may carry muxed audio+video, where a disabled video track still costs full bitrate.
+     * VOD: DASH when offered, else HLS. NewPipe rarely offers DASH for YouTube VOD, so this is
+     * normally HLS. YouTube's HLS keeps audio in separate `EXT-X-MEDIA` renditions (video-only
+     * variants), but that is only confirmed once Media3 has loaded the multivariant playlist:
+     * HLS starts as [SourceLayout.HLS_PENDING] and [PlayerFactory.effectiveLayout] refines it.
      */
     private fun resolveManifestUrl(extractor: StreamExtractor, live: Boolean): ManifestUrl? {
         val hls = runCatching { extractor.hlsUrl }.getOrNull()?.takeIf { it.isNotBlank() }
-            ?.let { ManifestUrl(it, SourceLayout.MUXED_MANIFEST) }
+            ?.let { ManifestUrl(it, SourceLayout.HLS_PENDING) }
         val dash = runCatching { extractor.dashMpdUrl }.getOrNull()?.takeIf { it.isNotBlank() }
             ?.let { ManifestUrl(it, SourceLayout.SEPARATE) }
         return if (live) hls ?: dash else dash ?: hls
+    }
+
+    /**
+     * Audio-rendition playlist from the live HLS master (one small gzip'd request). Null when the
+     * master cannot be read or lists no audio rendition; the caller falls back to the manifest.
+     */
+    private fun liveAudioRendition(extractor: StreamExtractor, preferLow: Boolean): String? {
+        val masterUrl = runCatching { extractor.hlsUrl }.getOrNull()?.takeIf { it.isNotBlank() } ?: return null
+        return runCatching {
+            val request = OkHttpRequest.Builder().url(masterUrl).apply {
+                PlaybackSources.requestHeaders(masterUrl).forEach { (key, value) -> header(key, value) }
+            }.build()
+            manifestClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@use null
+                HlsLayout.pickAudioRendition(response.body.string(), masterUrl, preferLow)?.uri
+            }
+        }.onFailure { Log.w(TAG, "live audio rendition lookup failed", it) }.getOrNull()
     }
 
     /** NewPipe length is seconds; 0 / unknown → 0. */
@@ -595,7 +629,7 @@ class StreamResolver {
             val pureAudio: Boolean = true,
             val durationMs: Long = 0L,
             /** How audio and video are packaged in [streamUrl]; drives the audio-only policy. */
-            val layout: SourceLayout = if (pureAudio) SourceLayout.AUDIO_ONLY else SourceLayout.MUXED_MANIFEST
+            val layout: SourceLayout = if (pureAudio) SourceLayout.AUDIO_ONLY else SourceLayout.HLS_PENDING
         ) : Result()
         data class Error(val message: String) : Result()
     }
@@ -629,7 +663,7 @@ class StreamResolver {
         data class Manifest(
             val url: String,
             val isLive: Boolean,
-            val layout: SourceLayout = SourceLayout.MUXED_MANIFEST
+            val layout: SourceLayout = SourceLayout.HLS_PENDING
         ) : VideoResult()
         data class Error(val message: String) : VideoResult()
     }

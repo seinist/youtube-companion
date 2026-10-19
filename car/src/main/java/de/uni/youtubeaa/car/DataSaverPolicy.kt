@@ -8,18 +8,114 @@ import java.util.Locale
  * picture even when only the sound is used.
  */
 enum class SourceLayout {
-    /** Pure audio URL (itag 140/251 …). */
+    /** Pure audio URL (itag 140/251 …) or an HLS audio-rendition playlist. */
     AUDIO_ONLY,
-    /** Separate progressive video + audio (MergingMediaSource) or a DASH manifest. */
+    /** Separate progressive video + audio (MergingMediaSource), DASH, or HLS with audio renditions. */
     SEPARATE,
     /** Progressive itag carrying audio and video in one file (e.g. itag 18). */
     MUXED_PROGRESSIVE,
-    /** HLS manifest: variants may carry muxed audio+video (always for YouTube live). */
-    MUXED_MANIFEST;
+    /** HLS whose variants carry muxed audio+video (no separate audio rendition). */
+    MUXED_MANIFEST,
+    /**
+     * HLS whose multivariant playlist has not been inspected yet. YouTube's HLS (VOD and live)
+     * has separate audio renditions, but that is only known once Media3 has loaded the manifest
+     * ([HlsLayout.classify]); until then it is handled as conservatively as [MUXED_MANIFEST].
+     */
+    HLS_PENDING;
 
     /** True when disabling the video track really stops video downloads. */
     val videoCanBeDroppedForFree: Boolean
         get() = this == AUDIO_ONLY || this == SEPARATE
+
+    /** Audio-only needs the lowest video rung instead of a disabled video track. */
+    val needsLowestPin: Boolean
+        get() = this == MUXED_MANIFEST || this == HLS_PENDING
+}
+
+/** Pure HLS layout detection (unit-tested); fed from Media3's loaded multivariant playlist. */
+object HlsLayout {
+    /**
+     * [audioRenditionUris] are the URIs of the playlist's `EXT-X-MEDIA TYPE=AUDIO` entries (null
+     * for a rendition without URI, whose audio is muxed into the variants). Any rendition with its
+     * own URI means the variants are video-only: disabling video stops the video download.
+     */
+    fun classify(audioRenditionUris: List<String?>): SourceLayout =
+        if (audioRenditionUris.any { !it.isNullOrBlank() }) SourceLayout.SEPARATE else SourceLayout.MUXED_MANIFEST
+
+    /** The layout to act on: a pending HLS source takes the detected value once known. */
+    fun refine(declared: SourceLayout, detected: SourceLayout?): SourceLayout =
+        if (declared == SourceLayout.HLS_PENDING && detected != null) detected else declared
+
+    data class AudioRendition(val groupId: String, val uri: String)
+
+    /** `EXT-X-MEDIA TYPE=AUDIO` entries with a URI, relative URIs resolved against [baseUrl]. */
+    fun audioRenditions(masterPlaylist: String, baseUrl: String? = null): List<AudioRendition> =
+        masterPlaylist.lineSequence()
+            .filter { it.startsWith("#EXT-X-MEDIA:") && attribute(it, "TYPE") == "AUDIO" }
+            .mapNotNull { line ->
+                val uri = attribute(line, "URI")?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                AudioRendition(attribute(line, "GROUP-ID").orEmpty(), resolve(baseUrl, uri))
+            }
+            .toList()
+
+    /**
+     * Picks the audio rendition for audio-only live playback: the group used by the highest
+     * bandwidth variant (YouTube: "234" = AAC-LC ~128 kbit/s); [preferLow] picks the group of
+     * the lowest variant instead (YouTube: "233" = HE-AAC ~48 kbit/s).
+     */
+    fun pickAudioRendition(masterPlaylist: String, baseUrl: String? = null, preferLow: Boolean = false): AudioRendition? {
+        val renditions = audioRenditions(masterPlaylist, baseUrl)
+        if (renditions.isEmpty()) return null
+        val groupsByBandwidth = masterPlaylist.lineSequence()
+            .filter { it.startsWith("#EXT-X-STREAM-INF:") }
+            .mapNotNull { line ->
+                val bandwidth = attribute(line, "BANDWIDTH")?.toLongOrNull() ?: return@mapNotNull null
+                val group = attribute(line, "AUDIO") ?: return@mapNotNull null
+                bandwidth to group
+            }
+            .sortedBy { it.first }
+            .map { it.second }
+            .toList()
+        val wanted = if (preferLow) groupsByBandwidth.firstOrNull() else groupsByBandwidth.lastOrNull()
+        return renditions.firstOrNull { it.groupId == wanted } ?: renditions.last()
+    }
+
+    private fun attribute(line: String, name: String): String? {
+        val match = Regex("""(?:^|[:,])$name=("([^"]*)"|[^,]*)""").find(line) ?: return null
+        return match.groupValues[2].ifEmpty { match.groupValues[1] }.trim('"')
+    }
+
+    private fun resolve(baseUrl: String?, uri: String): String {
+        if (baseUrl == null || uri.startsWith("http://") || uri.startsWith("https://")) return uri
+        return runCatching { java.net.URI(baseUrl).resolve(uri).toString() }.getOrDefault(uri)
+    }
+}
+
+/**
+ * Background live-stream auto-stop (pure, unit-tested). A live stream never ends on its own, so
+ * one left playing in the background (player closed via Home / screen-off) is stopped after the
+ * configured time without user interaction.
+ */
+object LiveAutoStopPolicy {
+    const val OFF = "off"
+    const val DEFAULT_MINUTES = "60"
+    val VALUES = listOf("30", "60", "120", OFF)
+
+    fun normalize(value: String?): String = value?.takeIf { it in VALUES } ?: DEFAULT_MINUTES
+
+    /** Timeout in ms, null = never stop. */
+    fun timeoutMs(value: String?): Long? =
+        normalize(value).toLongOrNull()?.takeIf { it > 0L }?.let { it * 60_000L }
+
+    /** Whether a running timer should exist at all for the given playback situation. */
+    fun applies(isLive: Boolean, inBackground: Boolean, playing: Boolean, value: String?): Boolean =
+        isLive && inBackground && playing && timeoutMs(value) != null
+
+    /** True when the live stream has run [elapsedSinceInteractionMs] past the limit. */
+    fun shouldStop(isLive: Boolean, inBackground: Boolean, playing: Boolean, elapsedSinceInteractionMs: Long, value: String?): Boolean {
+        if (!applies(isLive, inBackground, playing, value)) return false
+        return elapsedSinceInteractionMs >= (timeoutMs(value) ?: return false)
+    }
 }
 
 /**

@@ -435,6 +435,10 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
 
     private fun setupControls() {
         findViewById<ImageButton>(R.id.player_overlay_back).setOnClickListener {
+            if (backStopsPlayback()) {
+                stopAndReturnToSource()
+                return@setOnClickListener
+            }
             handoffVideoToBackgroundAudio()
             finish()
         }
@@ -592,7 +596,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
         // Only separate audio/video tracks stop downloading video when it is disabled; a muxed
         // source falls through to a pure audio reload below (data saver).
         if (!wasAudioOnly && audioOnly && currentSourceHasAudioForSeamlessSwitch &&
-            currentSourceLayout.videoCanBeDroppedForFree
+            trackSelector?.let { PlayerFactory.effectiveLayout(it, currentSourceLayout) }?.videoCanBeDroppedForFree == true
         ) {
             loadJob?.cancel()
             preserveSourcePosition = false
@@ -1026,12 +1030,25 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
                 setFullscreen(false)
                 return
             }
+            if (backStopsPlayback()) {
+                // Back closes the video for good; Home / screen-off still continue as audio.
+                stopAndReturnToSource()
+                return
+            }
             handoffVideoToBackgroundAudio()
             isEnabled = false
             onBackPressedDispatcher.onBackPressed()
             isEnabled = true
         }
     }
+
+    /**
+     * Back in video mode ends playback (setting, default on): a video left by Back used to keep
+     * streaming as background audio indefinitely (live streams forever). Audio mode keeps its
+     * deliberate background playback; Home and screen-off are not affected.
+     */
+    private fun backStopsPlayback(): Boolean =
+        !isAudioOnlyMode() && VideoSessionBridge.isOwner(this) && settings.isBackStopsPlayback()
 
     private fun handoffVideoToBackgroundAudio() {
         if (backgroundAudioHandoffDone || isAudioOnlyMode() || !VideoSessionBridge.isOwner(this)) return
