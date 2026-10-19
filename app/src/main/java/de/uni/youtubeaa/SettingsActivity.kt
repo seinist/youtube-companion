@@ -10,10 +10,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.material.appbar.MaterialToolbar
+import de.uni.youtubeaa.car.DataUsageStats
 import de.uni.youtubeaa.car.HeadUnitDiagnostics
 import de.uni.youtubeaa.car.SettingsRepository
 import de.uni.youtubeaa.car.hybrid.YtSessionStore
 import kotlinx.coroutines.launch
+import java.text.DateFormat
+import java.util.Date
 
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,6 +61,19 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
                 true
             }
+            findPreference<Preference>(KEY_DATA_USAGE)?.setOnPreferenceClickListener {
+                AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.data_usage_reset_title)
+                    .setMessage(R.string.data_usage_reset_message)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.data_usage_reset) { _, _ ->
+                        DataUsageStats.reset(requireContext())
+                        updateDataUsagePreference()
+                    }
+                    .show()
+                true
+            }
+            updateDataUsagePreference()
             accountPreference.setOnPreferenceClickListener {
                 if (ytSession.isSignedIn()) {
                     showDisconnectDialog()
@@ -73,6 +89,25 @@ class SettingsActivity : AppCompatActivity() {
         override fun onResume() {
             super.onResume()
             if (::accountPreference.isInitialized) updateAccountPreference()
+            updateDataUsagePreference()
+        }
+
+        /** Bytes the players actually downloaded, to compare with Android's per-app data usage. */
+        private fun updateDataUsagePreference() {
+            val preference = findPreference<Preference>(KEY_DATA_USAGE) ?: return
+            val snapshot = DataUsageStats.snapshot(requireContext())
+            fun total(kind: DataUsageStats.Kind) =
+                DataUsageStats.formatBytes(snapshot.bytes[kind]?.let { it.first + it.second } ?: 0L)
+            preference.summary = getString(
+                R.string.pref_data_usage_summary,
+                DataUsageStats.formatBytes(snapshot.meteredTotal),
+                DataUsageStats.formatBytes(snapshot.unmeteredTotal),
+                total(DataUsageStats.Kind.VIDEO),
+                total(DataUsageStats.Kind.AUDIO),
+                total(DataUsageStats.Kind.MUXED),
+                total(DataUsageStats.Kind.OTHER),
+                DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(snapshot.sinceMs))
+            )
         }
 
 
@@ -135,6 +170,7 @@ class SettingsActivity : AppCompatActivity() {
             private const val KEY_ACCOUNT = "youtube_account"
             private const val KEY_SHARE_HU_LOGS = "share_head_unit_logs"
             private const val KEY_CLEAR_HU_LOGS = "clear_head_unit_logs"
+            private const val KEY_DATA_USAGE = "playback_data_usage"
         }
     }
 }

@@ -76,6 +76,7 @@ internal object PlaybackDiagnostics {
                 HeadUnitDiagnostics.event(tag, "state-changed ${state()}")
             }
         })
+        context?.applicationContext?.let { player.addAnalyticsListener(DataUsageStats.Listener(it)) }
         player.addAnalyticsListener(
             ClockWatchdog(
                 player,
