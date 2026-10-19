@@ -106,6 +106,7 @@
     <string name="player_retrying">Wiedergabe wird neu verbunden …</string>
     <string name="player_share">Teilen</string>
     <string name="player_related_videos">Ähnliche Videos</string>
+    <string name="player_related_load">Ähnliche Videos anzeigen</string>
     <string name="login_status_ready">Login → Google-Konto → YouTube zulassen</string>
     <string name="tv_login_already_linked">Bereits verknüpft. Du kannst Abos und den Feed laden oder dich auf der Startseite abmelden.</string>
     <string name="tv_login_preparing">Client und Code werden vorbereitet …</string>
@@ -157,7 +158,7 @@
     <string name="pref_default_mode">Standard-Wiedergabemodus</string>
     <string name="pref_default_mode_summary">Video oder nur Audio (im Player umschaltbar)</string>
     <string name="pref_backend">Video-Backend (AA)</string>
-    <string name="pref_backend_summary">ExoPlayer ist performanter; WebView nur bei Bedarf manuell wählen</string>
+    <string name="pref_backend_summary">ExoPlayer ist performanter; WebView nur bei Bedarf manuell wählen. WebView ignoriert die Mobildaten-Grenze und den Datenzähler.</string>
     <string name="pref_car_surface">AA Video-Oberfläche</string>
     <string name="pref_car_surface_summary">SurfaceView spart GPU/Copy-Arbeit; TextureView ist der Kompatibilitäts-Fallback</string>
     <string name="pref_require_parked">Parkprüfung vor Video</string>

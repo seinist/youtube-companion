@@ -113,6 +113,7 @@
     <string name="player_retrying">Reconnecting playback…</string>
     <string name="player_share">Share</string>
     <string name="player_related_videos">Related videos</string>
+    <string name="player_related_load">Show related videos</string>
     <string name="brand_youtube" translatable="false">YouTube</string>
     <string name="time_zero" translatable="false">0:00</string>
     <string name="time_separator" translatable="false"> / </string>
@@ -171,7 +172,7 @@
     <string name="pref_default_mode">Default playback mode</string>
     <string name="pref_default_mode_summary">Video or audio only (can be switched in the player)</string>
     <string name="pref_backend">Video backend (AA)</string>
-    <string name="pref_backend_summary">ExoPlayer performs better; only choose WebView manually if needed</string>
+    <string name="pref_backend_summary">ExoPlayer performs better; only choose WebView manually if needed. WebView ignores the mobile-data limit and the data counter.</string>
     <string name="pref_car_surface">AA video surface</string>
     <string name="pref_car_surface_summary">SurfaceView saves GPU and copy work; TextureView is the compatibility fallback</string>
     <string name="pref_require_parked">Parking check before video</string>

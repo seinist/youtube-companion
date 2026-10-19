@@ -10,6 +10,7 @@
     <string name="park_warning_message">Only use video while safely parked. If the parking state cannot be determined, confirm this only once the vehicle is stationary.</string>
     <string name="park_warning_continue">Continue anyway</string>
     <string name="video_error_stream">Could not load the video stream</string>
+    <string name="webview_metered_hint">Mobile data: the WebView player ignores the data-saving limit and may stream in HD.</string>
     <string name="browse_back">Back</string>
     <string name="browse_home">Home · Recommendations</string>
     <string name="browse_subscriptions">Subscriptions</string>

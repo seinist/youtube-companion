@@ -434,6 +434,9 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
     }
 
     private fun setupControls() {
+        findViewById<View>(R.id.player_details_scroll).setOnScrollChangeListener { _, _, _, _, _ ->
+            maybeLoadVisibleRelated()
+        }
         findViewById<ImageButton>(R.id.player_overlay_back).setOnClickListener {
             if (backStopsPlayback()) {
                 stopAndReturnToSource()
@@ -700,12 +703,54 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
 
     private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
 
+    /**
+     * Related videos cost a search plus up to eight thumbnails per opened video, so they load
+     * lazily: on unmetered networks once the section scrolls into view, on mobile data only after
+     * an explicit tap on "Show related videos".
+     */
     private fun loadRelatedVideos(video: MediaDescriptionCompat) {
         relatedJob?.cancel()
         val container = findViewById<LinearLayout>(R.id.player_related_container)
         val titleView = findViewById<TextView>(R.id.player_related_title)
+        val loadButton = findViewById<View>(R.id.player_related_load)
         container.removeAllViews()
         titleView.visibility = View.GONE
+        loadButton.visibility = View.GONE
+        pendingRelatedVideo = null
+        val query = video.title?.toString()?.trim().orEmpty()
+        if (query.isBlank()) return
+        pendingRelatedVideo = video
+        if (NetworkPolicy.isMeteredCached(this)) {
+            titleView.visibility = View.VISIBLE
+            loadButton.visibility = View.VISIBLE
+            loadButton.setOnClickListener { startRelatedLoad() }
+        } else {
+            // Invisible placeholder at the section's position; the scroll check loads it.
+            titleView.visibility = View.INVISIBLE
+            findViewById<View>(R.id.player_details_scroll).post { maybeLoadVisibleRelated() }
+        }
+    }
+
+    private var pendingRelatedVideo: MediaDescriptionCompat? = null
+
+    /** Unmetered: start the related search once its section is on screen. */
+    private fun maybeLoadVisibleRelated() {
+        if (pendingRelatedVideo == null || NetworkPolicy.isMeteredCached(this)) return
+        val anchor = findViewById<View>(R.id.player_related_title)
+        if (anchor.isAttachedToWindow && anchor.getLocalVisibleRect(android.graphics.Rect())) startRelatedLoad()
+    }
+
+    private fun startRelatedLoad() {
+        val video = pendingRelatedVideo ?: return
+        pendingRelatedVideo = null
+        findViewById<View>(R.id.player_related_load).visibility = View.GONE
+        fetchRelatedVideos(video)
+    }
+
+    private fun fetchRelatedVideos(video: MediaDescriptionCompat) {
+        relatedJob?.cancel()
+        val container = findViewById<LinearLayout>(R.id.player_related_container)
+        val titleView = findViewById<TextView>(R.id.player_related_title)
         val query = video.title?.toString()?.trim().orEmpty()
         if (query.isBlank()) return
 
@@ -716,7 +761,11 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
                 .filter { !it.mediaId.isNullOrBlank() && it.mediaId != currentId }
                 .distinctBy { it.mediaId }
                 .take(8)
-            if (related.isEmpty() || isFinishing || isDestroyed) return@launch
+            if (isFinishing || isDestroyed) return@launch
+            if (related.isEmpty()) {
+                titleView.visibility = View.GONE
+                return@launch
+            }
 
             titleView.visibility = View.VISIBLE
             val inflater = LayoutInflater.from(this@VideoPlayerActivity)

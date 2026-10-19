@@ -8,6 +8,7 @@
     <string name="park_warning_message">Video nur im sicheren Stand verwenden. Wenn der Parkstatus nicht ermittelt werden kann, bestätige dies erst am stehenden Fahrzeug.</string>
     <string name="park_warning_continue">Trotzdem fortfahren</string>
     <string name="video_error_stream">Video-Stream konnte nicht geladen werden</string>
+    <string name="webview_metered_hint">Mobile Daten: Der WebView-Player ignoriert die Datenspar-Grenze und streamt ggf. in HD.</string>
     <string name="browse_back">Zurück</string>
     <string name="browse_home">Startseite · Empfehlungen</string>
     <string name="browse_subscriptions">Abos</string>

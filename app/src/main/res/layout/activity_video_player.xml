@@ -460,6 +460,17 @@
                 android:textStyle="bold"
                 android:visibility="gone" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/player_related_load"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="22dp"
+                android:text="@string/player_related_load"
+                android:textAllCaps="false"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:id="@+id/player_related_container"
                 android:layout_width="match_parent"
