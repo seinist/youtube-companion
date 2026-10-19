@@ -146,6 +146,9 @@
     <string name="data_usage_reset_title">Datenverbrauch zurücksetzen?</string>
     <string name="data_usage_reset_message">Die Byte-Zähler der Wiedergabe beginnen wieder bei null.</string>
     <string name="data_usage_reset">Zurücksetzen</string>
+    <string name="pref_network_usage">Netzwerk-Datenverbrauch (ganze App)</string>
+    <string name="pref_network_usage_summary">App gesamt (Android-Zähler): mobil %1$s · WLAN/ungetaktet %2$s\nAnfragen: Suche %3$s · Feeds %4$s · Bilder %5$s · Stream-Auflösung %6$s · Sonstiges %7$s\nGezählt, solange die App läuft; mit der Android-Datennutzung pro App vergleichbar.</string>
+    <string name="pref_network_usage_unsupported">auf diesem Gerät nicht verfügbar</string>
     <string name="pref_default_speed">Standard-Geschwindigkeit</string>
     <string name="pref_default_mode">Standard-Wiedergabemodus</string>
     <string name="pref_default_mode_summary">Video oder nur Audio (im Player umschaltbar)</string>

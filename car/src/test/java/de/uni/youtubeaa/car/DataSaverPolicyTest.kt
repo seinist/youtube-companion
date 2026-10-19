@@ -78,5 +78,11 @@ class DataSaverPolicyTest {
         assertEquals(DataUsageStats.Kind.VIDEO, DataUsageStats.kindOf(C.TRACK_TYPE_UNKNOWN, C.DATA_TYPE_MEDIA, "video/mp4"))
         assertEquals(DataUsageStats.Kind.OTHER, DataUsageStats.kindOf(C.TRACK_TYPE_UNKNOWN, C.DATA_TYPE_MANIFEST, "video/mp4"))
         assertEquals(DataUsageStats.Kind.OTHER, DataUsageStats.kindOf(C.TRACK_TYPE_UNKNOWN, C.DATA_TYPE_MEDIA, null))
+        // HLS main wrapper: video-only variants when the playlist has audio renditions.
+        assertEquals(DataUsageStats.Kind.VIDEO,
+            DataUsageStats.kindOf(C.TRACK_TYPE_DEFAULT, C.DATA_TYPE_MEDIA, null, hlsVariantsAreVideoOnly = true))
+        // Progressive without query mime: the Media3 format decides.
+        assertEquals(DataUsageStats.Kind.AUDIO,
+            DataUsageStats.kindOf(C.TRACK_TYPE_UNKNOWN, C.DATA_TYPE_MEDIA, null, formatMime = "audio/mp4a-latm"))
     }
 }

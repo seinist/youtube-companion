@@ -131,6 +131,7 @@ class YouTubeMediaBrowserService : MediaBrowserServiceCompat() {
     }
 
     override fun onDestroy() {
+        DataUsageStats.flush(this)
         mediaController.unregisterCallback(controllerCallback)
         serviceJob.cancel()
         mediaSessionHolder.release()

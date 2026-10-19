@@ -137,6 +137,9 @@
             android:key="playback_data_usage"
             android:title="@string/pref_data_usage" />
         <Preference
+            android:key="network_data_usage"
+            android:title="@string/pref_network_usage" />
+        <Preference
             android:key="share_head_unit_logs"
             android:title="@string/pref_share_hu_logs"
             android:summary="@string/pref_share_hu_logs_summary" />
