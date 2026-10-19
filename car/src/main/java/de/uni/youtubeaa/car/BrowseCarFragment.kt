@@ -982,6 +982,7 @@ class BrowseCarFragment : Fragment() {
         displayedScreen = screen
         // The top rows are the likely taps; warming their watch pages saves 1.5-2.5 s per start.
         StreamResolver.prefetch(
+            requireContext(),
             rows.asSequence()
                 .filter { it.kind == RowKind.VIDEO && it.id.startsWith(VIDEO_PREFIX) }
                 .map { it.id.removePrefix(VIDEO_PREFIX) }

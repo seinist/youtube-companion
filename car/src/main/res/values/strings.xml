@@ -10,6 +10,7 @@
     <string name="park_warning_message">Only use video while safely parked. If the parking state cannot be determined, confirm this only once the vehicle is stationary.</string>
     <string name="park_warning_continue">Continue anyway</string>
     <string name="video_error_stream">Could not load the video stream</string>
+    <string name="webview_metered_hint">Mobile data: the WebView player ignores the data-saving limit and may stream in HD.</string>
     <string name="browse_back">Back</string>
     <string name="browse_home">Home · Recommendations</string>
     <string name="browse_subscriptions">Subscriptions</string>
@@ -35,6 +36,7 @@
     <string name="car_settings_title">Settings</string>
     <string name="car_settings_hint">Tap to change the value (also applies to the phone app)</string>
     <string name="settings_quality">Video resolution</string>
+    <string name="settings_mobile_quality">Quality on mobile data</string>
     <string name="settings_speed">Speed</string>
     <string name="settings_audio_language">Audio language</string>
     <string name="settings_audio_bitrate">Audio bitrate</string>
@@ -120,6 +122,7 @@
 
     <!-- Android Auto settings values -->
     <string name="car_value_auto">Auto</string>
+    <string name="car_value_no_limit">No limit</string>
     <string name="car_value_on">On</string>
     <string name="car_value_off">Off</string>
     <string name="car_layout_cards">Cards</string>

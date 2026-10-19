@@ -168,6 +168,14 @@ class WebViewFallbackFragment : Fragment() {
         }
         status.visibility = View.GONE
         currentVideo = video
+        // The web player picks its own quality: no mobile-data cap, data saver or byte counter.
+        if (NetworkPolicy.isMeteredCached(requireContext())) {
+            val hint = getString(R.string.webview_metered_hint)
+            status.visibility = View.VISIBLE
+            status.text = hint
+            mainHandler.postDelayed({ if (status.text == hint) status.visibility = View.GONE }, METERED_HINT_MS)
+            HeadUnitDiagnostics.event("WebViewFallback", "metered-hint shown")
+        }
         webView?.loadUrl("https://www.youtube.com/watch?v=$videoId")
     }
 
@@ -221,6 +229,7 @@ class WebViewFallbackFragment : Fragment() {
 
     companion object {
         const val ARG_VIDEO = "video"
+        private const val METERED_HINT_MS = 8_000L
 
         fun newInstance(video: MediaDescriptionCompat, requestId: Long = 0L, startPositionMs: Long = 0L) = WebViewFallbackFragment().apply {
             arguments = Bundle().apply {

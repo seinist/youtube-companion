@@ -46,9 +46,10 @@ object CarVideoPolicy {
         playbackSpeed: Float,
         thermalStatus: Int,
         relaxFrameRate: Boolean = false,
-        metered: Boolean = false
+        metered: Boolean = false,
+        mobileDataQuality: String = DataSaverPolicy.DEFAULT_MOBILE_QUALITY
     ): Budget {
-        val effectiveQuality = effectiveQuality(quality, thermalStatus, metered)
+        val effectiveQuality = effectiveQuality(quality, thermalStatus, metered, mobileDataQuality)
         val shortSide = qualityShortSide(effectiveQuality)
         val longSide = qualityLongSide(effectiveQuality)
         val cappedProjectionFps = projectionFps.takeIf { it in 1..240 }
@@ -76,19 +77,26 @@ object CarVideoPolicy {
     }
 
     /**
-     * Thermal / drop-pressure / data-saver adaptation is limited to Auto; explicit qualities stay
-     * user-owned. Healthy Auto stops at 720p: the projection re-encodes the picture at the head
-     * unit's resolution (typically 800x480 or 1280x720), so more pixels only cost data and heat.
-     * A metered connection caps Auto at 480p like the official app's data saver. Under load it
-     * steps down, but not below 360 so adaptive manifests keep several ABR rungs.
+     * Thermal / drop-pressure adaptation is limited to Auto; explicit qualities stay user-owned.
+     * Healthy Auto stops at 720p: the projection re-encodes the picture at the head unit's
+     * resolution (typically 800x480 or 1280x720), so more pixels only cost data and heat. Under
+     * load it steps down, but not below 360 so adaptive manifests keep several ABR rungs.
+     *
+     * On a metered connection the user's mobile-data cap ([DataSaverPolicy], default 480p)
+     * applies to every setting, explicit qualities included.
      */
-    fun effectiveQuality(quality: String, thermalStatus: Int, metered: Boolean = false): String {
-        if (!quality.equals("auto", ignoreCase = true)) return quality
-        return when {
+    fun effectiveQuality(
+        quality: String,
+        thermalStatus: Int,
+        metered: Boolean = false,
+        mobileDataQuality: String = DataSaverPolicy.DEFAULT_MOBILE_QUALITY
+    ): String {
+        val base = if (!quality.equals("auto", ignoreCase = true)) quality else when {
             thermalStatus >= 4 -> "360" // CRITICAL / EMERGENCY / extreme drop pressure
-            thermalStatus >= 3 || metered -> "480" // SEVERE or data saver
+            thermalStatus >= 3 -> "480" // SEVERE
             else -> "720"
         }
+        return DataSaverPolicy.capQuality(base, metered, mobileDataQuality)
     }
 
     fun qualityShortSide(quality: String): Int = when (quality.lowercase()) {

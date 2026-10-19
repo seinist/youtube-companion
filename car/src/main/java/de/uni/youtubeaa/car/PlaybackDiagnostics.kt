@@ -48,7 +48,8 @@ internal object PlaybackDiagnostics {
         context: Context? = null,
         onVideoDecoderStarted: ((HardwareVideoCodecs.DecoderIdentity, Format?) -> Unit)? = null,
         videoExpectationProvider: (() -> VideoExpectation?)? = null,
-        onDroppedVideoFrames: ((Int, Long) -> Unit)? = null
+        onDroppedVideoFrames: ((Int, Long) -> Unit)? = null,
+        hlsVariantsAreVideoOnly: () -> Boolean = { false }
     ) {
         fun state() = "state=${player.playbackState} wantsPlay=${player.playWhenReady} " +
             "playing=${player.isPlaying} suppression=${player.playbackSuppressionReason} " +
@@ -76,6 +77,7 @@ internal object PlaybackDiagnostics {
                 HeadUnitDiagnostics.event(tag, "state-changed ${state()}")
             }
         })
+        context?.applicationContext?.let { player.addAnalyticsListener(DataUsageStats.Listener(it, hlsVariantsAreVideoOnly)) }
         player.addAnalyticsListener(
             ClockWatchdog(
                 player,

@@ -25,6 +25,18 @@
         <item>240p</item>
         <item>144p</item>
     </string-array>
+    <string-array name="mobile_quality_entries">
+        <item>360p</item>
+        <item>480p (empfohlen)</item>
+        <item>720p</item>
+        <item>Keine Begrenzung</item>
+    </string-array>
+    <string-array name="live_auto_stop_entries">
+        <item>Nach 30 Minuten</item>
+        <item>Nach 60 Minuten</item>
+        <item>Nach 2 Stunden</item>
+        <item>Nie</item>
+    </string-array>
     <string-array name="backend_entries">
         <item>ExoPlayer (empfohlen)</item>
         <item>WebView (Kompatibilität)</item>

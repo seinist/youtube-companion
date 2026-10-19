@@ -1,6 +1,7 @@
 package de.uni.youtubeaa.car.hybrid
 
 import de.uni.youtubeaa.car.AppText
+import de.uni.youtubeaa.car.DataUsageStats
 import de.uni.youtubeaa.car.R
 import de.uni.youtubeaa.car.SharedHttp
 
@@ -297,7 +298,7 @@ class YtTvAuthClient(
         private val JSON = "application/json; charset=utf-8".toMediaType()
 
         private fun defaultClient(): OkHttpClient =
-            SharedHttp.builder()
+            SharedHttp.builder(DataUsageStats.Subsystem.OTHER)
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.SECONDS)
                 .build()

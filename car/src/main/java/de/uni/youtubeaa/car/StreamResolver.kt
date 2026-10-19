@@ -36,6 +36,7 @@ class StreamResolver {
     companion object {
         private const val TAG = "StreamResolver"
         private const val MAX_CACHED_EXTRACTORS = 6
+        private val manifestClient by lazy { SharedHttp.builder(DataUsageStats.Subsystem.EXTRACTOR).build() }
         private const val MAX_VIDEO_CANDIDATE_LOGS = 16
         /** Signed URLs live for hours; refetch well before that so a cache hit is never stale. */
         private const val EXTRACTOR_MAX_AGE_MS = 30 * 60_000L
@@ -59,7 +60,9 @@ class StreamResolver {
          * fetch is 1.5-2.5 s of every start in head-unit logs; the official app hides it the same
          * way. Failures are ignored, the real resolve simply fetches again.
          */
-        fun prefetch(videoIds: List<String>) {
+        fun prefetch(context: android.content.Context, videoIds: List<String>) {
+            // Data saver: on mobile data a watch page per visible row is spent before any tap.
+            if (NetworkPolicy.isMeteredCached(context)) return
             for (videoId in videoIds.distinct()) {
                 if (videoId.isBlank() || isCached(videoId)) continue
                 prefetchScope.launch {
@@ -155,13 +158,30 @@ class StreamResolver {
                 }
             }
 
-            // Fallback: HLS/DASH manifest — ExoPlayer + disabled video tracks (traffic-friendly).
-            resolveManifestUrl(extractor)?.let {
+            // Live has no progressive audio. YouTube's HLS master lists the audio as separate
+            // renditions: playing that audio playlist directly loads no video at all (~1 MB/min
+            // instead of the 144p variant plus audio).
+            if (live) {
+                liveAudioRendition(extractor, preferLow = audioPrefs.bitrate == "low")?.let { url ->
+                    HeadUnitDiagnostics.event("StreamResolver", "audio videoId=$videoId source=hls-audio-rendition")
+                    return@withContext Result.Success(
+                        streamUrl = url,
+                        isLive = true,
+                        pureAudio = true,
+                        durationMs = durationMs
+                    )
+                }
+            }
+
+            // Fallback: HLS/DASH manifest with the video track disabled (or, for HLS that turns
+            // out to be truly muxed, pinned to the lowest rung).
+            resolveManifestUrl(extractor, live)?.let {
                 return@withContext Result.Success(
-                    streamUrl = it,
+                    streamUrl = it.url,
                     isLive = live,
                     pureAudio = false,
-                    durationMs = durationMs
+                    durationMs = durationMs,
+                    layout = it.layout
                 )
             }
 
@@ -206,21 +226,21 @@ class StreamResolver {
 
                 // Live / post-live almost never have usable progressive itags — use HLS/DASH first.
                 if (live) {
-                    resolveManifestUrl(extractor)?.let {
-                        HeadUnitDiagnostics.event("StreamResolver", "video videoId=$videoId source=manifest-live quality=$quality maxFps=$effectiveMaxFps")
-                        return@withContext VideoResult.Manifest(it, isLive = true)
+                    resolveManifestUrl(extractor, live = true)?.let {
+                        HeadUnitDiagnostics.event("StreamResolver", "video videoId=$videoId source=manifest-live layout=${it.layout} quality=$quality maxFps=$effectiveMaxFps")
+                        return@withContext VideoResult.Manifest(it.url, isLive = true, layout = it.layout)
                     }
                 }
 
                 // Phone/HU Auto: adaptive first. A fixed high progressive needs a large initial
                 // download before bufferForPlaybackMs is reached; ABR can begin on a lower rung.
                 if (preferAdaptive) {
-                    resolveManifestUrl(extractor)?.let {
+                    resolveManifestUrl(extractor, live = false)?.let {
                         HeadUnitDiagnostics.event(
                             "StreamResolver",
-                            "video videoId=$videoId source=manifest-adaptive-preferred quality=$quality maxFps=$effectiveMaxFps"
+                            "video videoId=$videoId source=manifest-adaptive-preferred layout=${it.layout} quality=$quality maxFps=$effectiveMaxFps"
                         )
-                        return@withContext VideoResult.Manifest(it, isLive = false)
+                        return@withContext VideoResult.Manifest(it.url, isLive = false, layout = it.layout)
                     }
                 }
 
@@ -357,13 +377,13 @@ class StreamResolver {
                 // If no progressive candidate survives (including after exhausting all HW itags),
                 // try the adaptive manifest before accepting software. Media3 can inspect the real
                 // manifest Formats and select a HW-safe adaptive track set there.
-                resolveManifestUrl(extractor)?.let {
+                resolveManifestUrl(extractor, live)?.let {
                     HeadUnitDiagnostics.event(
                         "StreamResolver",
-                        "video videoId=$videoId source=manifest-fallback quality=$quality maxFps=$effectiveMaxFps " +
+                        "video videoId=$videoId source=manifest-fallback layout=${it.layout} quality=$quality maxFps=$effectiveMaxFps " +
                             "afterHardwareExhaustion=$requireHardware"
                     )
-                    return@withContext VideoResult.Manifest(it, isLive = live)
+                    return@withContext VideoResult.Manifest(it.url, isLive = live, layout = it.layout)
                 }
 
                 if (requireHardware) {
@@ -450,11 +470,38 @@ class StreamResolver {
     }
 
 
-    /** Prefer HLS (best ExoPlayer support for YT live), then DASH. */
-    private fun resolveManifestUrl(extractor: StreamExtractor): String? {
+    private class ManifestUrl(val url: String, val layout: SourceLayout)
+
+    /**
+     * Live: HLS first (best ExoPlayer support for YT live), then DASH.
+     * VOD: DASH when offered, else HLS. NewPipe rarely offers DASH for YouTube VOD, so this is
+     * normally HLS. YouTube's HLS keeps audio in separate `EXT-X-MEDIA` renditions (video-only
+     * variants), but that is only confirmed once Media3 has loaded the multivariant playlist:
+     * HLS starts as [SourceLayout.HLS_PENDING] and [PlayerFactory.effectiveLayout] refines it.
+     */
+    private fun resolveManifestUrl(extractor: StreamExtractor, live: Boolean): ManifestUrl? {
         val hls = runCatching { extractor.hlsUrl }.getOrNull()?.takeIf { it.isNotBlank() }
-        if (hls != null) return hls
-        return runCatching { extractor.dashMpdUrl }.getOrNull()?.takeIf { it.isNotBlank() }
+            ?.let { ManifestUrl(it, SourceLayout.HLS_PENDING) }
+        val dash = runCatching { extractor.dashMpdUrl }.getOrNull()?.takeIf { it.isNotBlank() }
+            ?.let { ManifestUrl(it, SourceLayout.SEPARATE) }
+        return if (live) hls ?: dash else dash ?: hls
+    }
+
+    /**
+     * Audio-rendition playlist from the live HLS master (one small gzip'd request). Null when the
+     * master cannot be read or lists no audio rendition; the caller falls back to the manifest.
+     */
+    private fun liveAudioRendition(extractor: StreamExtractor, preferLow: Boolean): String? {
+        val masterUrl = runCatching { extractor.hlsUrl }.getOrNull()?.takeIf { it.isNotBlank() } ?: return null
+        return runCatching {
+            val request = OkHttpRequest.Builder().url(masterUrl).apply {
+                PlaybackSources.requestHeaders(masterUrl).forEach { (key, value) -> header(key, value) }
+            }.build()
+            manifestClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@use null
+                HlsLayout.pickAudioRendition(response.body.string(), masterUrl, preferLow)?.uri
+            }
+        }.onFailure { Log.w(TAG, "live audio rendition lookup failed", it) }.getOrNull()
     }
 
     /** NewPipe length is seconds; 0 / unknown → 0. */
@@ -580,7 +627,9 @@ class StreamResolver {
             val streamUrl: String,
             val isLive: Boolean = false,
             val pureAudio: Boolean = true,
-            val durationMs: Long = 0L
+            val durationMs: Long = 0L,
+            /** How audio and video are packaged in [streamUrl]; drives the audio-only policy. */
+            val layout: SourceLayout = if (pureAudio) SourceLayout.AUDIO_ONLY else SourceLayout.HLS_PENDING
         ) : Result()
         data class Error(val message: String) : Result()
     }
@@ -611,7 +660,11 @@ class StreamResolver {
             val info: StreamInfo? = null
         ) : VideoResult()
         /** HLS or DASH manifest (typical for live / some VODs). */
-        data class Manifest(val url: String, val isLive: Boolean) : VideoResult()
+        data class Manifest(
+            val url: String,
+            val isLive: Boolean,
+            val layout: SourceLayout = SourceLayout.HLS_PENDING
+        ) : VideoResult()
         data class Error(val message: String) : VideoResult()
     }
 

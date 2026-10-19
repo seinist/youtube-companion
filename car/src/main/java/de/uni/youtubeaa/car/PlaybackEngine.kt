@@ -44,11 +44,28 @@ object PlaybackEngine : VideoSessionBridge.Controller {
     var currentIsLive: Boolean = false
     var sourceHasVideo = false
     var sourceHasAudio = false
+    /** Packaging of the prepared source; only separate tracks may drop video for free. */
+    var sourceLayout: SourceLayout = SourceLayout.AUDIO_ONLY
     var knownDurationMs = 0L
     private var pendingPositionMs = 0L
     fun isResolving(): Boolean = loadJob?.isActive == true
     /** False when play() alone cannot start output (no source after a failed resolve/error). */
-    fun canResumeInPlace(): Boolean = isResolving() || player.playbackState != Player.STATE_IDLE
+    fun canResumeInPlace(): Boolean = deferredAudio != null || isResolving() || player.playbackState != Player.STATE_IDLE
+
+    /**
+     * Audio stream to resolve on the next play(): set instead of resolving while paused (app
+     * switch with a muxed source, session adopted after an AA disconnect), so a paused session
+     * downloads nothing until the user actually presses Play.
+     */
+    private data class DeferredAudio(val videoId: String, val positionMs: Long)
+    private var deferredAudio: DeferredAudio? = null
+
+    /** Last user command or background start; the live auto-stop counts from here. */
+    private var lastInteractionElapsedMs = 0L
+
+    private fun noteInteraction() {
+        lastInteractionElapsedMs = SystemClock.elapsedRealtime()
+    }
     private var lastHistorySaveElapsedMs: Long = 0L
 
     private val handle: PlayerFactory.Handle by lazy {
@@ -181,6 +198,8 @@ object PlaybackEngine : VideoSessionBridge.Controller {
      * matching the already-established "video pauses on background/close" behavior.
      */
     fun activityAttached() {
+        // The Activity takes over with the (still loaded) source; a deferred swap is moot.
+        deferredAudio = null
         tickerJob?.cancel()
         tickerJob = null
     }
@@ -207,9 +226,12 @@ object PlaybackEngine : VideoSessionBridge.Controller {
 
     /**
      * Hands an active phone-video session to the process-wide engine as audio-only playback.
-     * If the current source already carries audio (muxed/manifest/merged), disabling video tracks
-     * is instant and preserves the exact buffered position. If it does not, resolve a pure audio
-     * stream headlessly and resume from the same position.
+     * Only when the current source keeps audio and video apart (DASH / merged separate
+     * progressive streams) is disabling the video track enough: that is instant and preserves the
+     * buffered position. A muxed source (HLS variants, itag 18) would keep downloading the
+     * picture at full bitrate in the background, so it is replaced by a true audio-only stream
+     * (~1 MB/min) resolved headlessly from the same position. Reopening the player restores
+     * video from [sourceHasVideo] == false.
      */
     fun handoffToBackgroundAudio(
         positionMs: Long,
@@ -225,18 +247,50 @@ object PlaybackEngine : VideoSessionBridge.Controller {
         VideoSessionBridge.register(this, VideoSessionBridge.Role.PHONE)
         startTicker()
 
-        if (currentSourceHasAudio && player.mediaItemCount > 0) {
+        noteInteraction()
+        deferredAudio = null
+        val layout = PlayerFactory.effectiveLayout(trackSelector, sourceLayout)
+        if (currentSourceHasAudio && layout.videoCanBeDroppedForFree && player.mediaItemCount > 0) {
             loadJob?.cancel()
-            PlayerFactory.setAudioOnly(trackSelector, true)
+            PlayerFactory.setAudioOnly(trackSelector, true, sourceLayout)
             player.playWhenReady = keepPlaying
             if (keepPlaying) player.play()
             NowPlayingBus.updatePlayback(player.isPlaying || keepPlaying, player.currentPosition, player.duration, owner = this@PlaybackEngine)
             return
         }
 
+        loadJob?.cancel()
+        if (!keepPlaying && currentSourceHasAudio && player.mediaItemCount > 0) {
+            // Paused: keep the (muxed) source as it is, without decoding its picture, and only
+            // swap to an audio stream once Play is pressed. Returning to the player before that
+            // simply re-enables video; nothing is downloaded meanwhile beyond the read-ahead.
+            PlayerFactory.setAudioOnly(trackSelector, true)
+            player.playWhenReady = false
+            deferredAudio = DeferredAudio(videoId, positionMs.coerceAtLeast(0L))
+            HeadUnitDiagnostics.event("PlaybackEngine", "background-audio deferred layout=$layout videoId=$videoId")
+            return
+        }
+
+        HeadUnitDiagnostics.event(
+            "PlaybackEngine",
+            "background-audio re-resolve layout=$layout hasAudio=$currentSourceHasAudio videoId=$videoId"
+        )
+        // The video source is about to be replaced: a returning Activity must re-resolve video
+        // instead of re-enabling a track that will be gone. Until then, keep the old source's
+        // audio running without decoding its picture.
+        sourceHasVideo = false
+        if (player.mediaItemCount > 0) PlayerFactory.setAudioOnly(trackSelector, true)
+        player.playWhenReady = keepPlaying
+        resolveBackgroundAudio(videoId, positionMs, continueFromPlayer = true)
+    }
+
+    /**
+     * Replaces the current source with an audio-only stream of [videoId]. [continueFromPlayer]
+     * resumes from the old source's live position (it kept playing during the resolve).
+     */
+    private fun resolveBackgroundAudio(videoId: String, positionMs: Long, continueFromPlayer: Boolean) {
         val settings = SettingsRepository(appContext)
         loadJob?.cancel()
-        player.playWhenReady = keepPlaying
         loadJob = engineScope.launch {
             val prefs = StreamResolver.AudioPrefs(
                 language = settings.getAudioLanguage(),
@@ -247,16 +301,18 @@ object PlaybackEngine : VideoSessionBridge.Controller {
                     currentIsLive = result.isLive
                     sourceHasVideo = false
                     sourceHasAudio = true
+                    sourceLayout = result.layout
                     knownDurationMs = result.durationMs
-                    PlayerFactory.setAudioOnly(trackSelector, true)
+                    val resumeAt = if (continueFromPlayer && player.mediaItemCount > 0) player.currentPosition else positionMs
+                    PlayerFactory.setAudioOnly(trackSelector, true, result.layout)
                     PlayerFactory.replaceSource(
                         player = player,
                         source = PlaybackSources.mediaSource(result.streamUrl),
-                        resumePositionMs = positionMs.coerceAtLeast(0L),
+                        resumePositionMs = resumeAt.coerceAtLeast(0L),
                         isLive = result.isLive,
                         playWhenReady = player.playWhenReady
                     )
-                    NowPlayingBus.updatePlayback(player.isPlaying, positionMs.coerceAtLeast(0L), result.durationMs, owner = this@PlaybackEngine)
+                    NowPlayingBus.updatePlayback(player.isPlaying, resumeAt.coerceAtLeast(0L), result.durationMs, owner = this@PlaybackEngine)
                 }
                 is StreamResolver.Result.Error -> {
                     // Keep the previous item paused rather than clearing the session entirely.
@@ -310,35 +366,8 @@ object PlaybackEngine : VideoSessionBridge.Controller {
             queueIndex = queueIndex,
             queueSize = queue.size.coerceAtLeast(1), owner = this@PlaybackEngine)
 
-        val settings = SettingsRepository(appContext)
-        loadJob?.cancel()
-        loadJob = engineScope.launch {
-            val prefs = StreamResolver.AudioPrefs(
-                language = settings.getAudioLanguage(),
-                bitrate = settings.getAudioBitrate()
-            )
-            when (val result = streamResolver.resolveAudioStreamUrl(videoId, prefs)) {
-                is StreamResolver.Result.Success -> {
-                    currentIsLive = result.isLive
-                    sourceHasVideo = false
-                    sourceHasAudio = true
-                    knownDurationMs = result.durationMs
-                    PlayerFactory.setAudioOnly(trackSelector, true)
-                    PlayerFactory.replaceSource(
-                        player = player,
-                        source = PlaybackSources.mediaSource(result.streamUrl),
-                        resumePositionMs = positionMs.coerceAtLeast(0L),
-                        isLive = result.isLive,
-                        playWhenReady = player.playWhenReady
-                    )
-                    NowPlayingBus.updatePlayback(player.isPlaying, positionMs.coerceAtLeast(0L), result.durationMs, owner = this@PlaybackEngine)
-                }
-                is StreamResolver.Result.Error -> {
-                    player.pause()
-                    NowPlayingBus.updatePlayback(false, positionMs.coerceAtLeast(0L), player.duration, owner = this@PlaybackEngine)
-                }
-            }
-        }
+        // Nothing is resolved or buffered while paused: Play resolves the audio stream.
+        deferredAudio = DeferredAudio(videoId, positionMs.coerceAtLeast(0L))
     }
 
     private fun refreshMetadataAsync(video: MediaDescriptionCompat, videoId: String) {
@@ -368,6 +397,7 @@ object PlaybackEngine : VideoSessionBridge.Controller {
 
     fun stopAndClear() {
         RemoteCastBus.cancelPending()
+        deferredAudio = null
         saveHistoryProgress()
         loadJob?.cancel()
         metadataJob?.cancel()
@@ -381,6 +411,7 @@ object PlaybackEngine : VideoSessionBridge.Controller {
         currentIsLive = false
         sourceHasVideo = false
         sourceHasAudio = false
+        sourceLayout = SourceLayout.AUDIO_ONLY
         if (VideoSessionBridge.activeRole == VideoSessionBridge.Role.PHONE) {
             NowPlayingBus.clear(owner = VideoSessionBridge.controller)
         }
@@ -415,8 +446,28 @@ object PlaybackEngine : VideoSessionBridge.Controller {
                         lastHistorySaveElapsedMs = now
                         saveHistoryProgress()
                     }
+                    checkLiveAutoStop(now)
                 }
             }
+        }
+    }
+
+    /**
+     * A live stream never ends: one left running in the background (player closed via Home or
+     * screen-off, this engine owns the session) stops after the configured time without a user
+     * command ([LiveAutoStopPolicy]).
+     */
+    private fun checkLiveAutoStop(now: Long) {
+        val setting = SettingsRepository(appContext).getLiveAutoStop()
+        val playing = player.isPlaying
+        if (!LiveAutoStopPolicy.applies(currentIsLive, inBackground = true, playing = playing, value = setting)) {
+            // Not a running background live stream (paused, VOD): the clock restarts later.
+            noteInteraction()
+            return
+        }
+        if (LiveAutoStopPolicy.shouldStop(currentIsLive, true, playing, now - lastInteractionElapsedMs, setting)) {
+            HeadUnitDiagnostics.event("PlaybackEngine", "live-auto-stop after=${setting}min")
+            stopAndClear()
         }
     }
 
@@ -430,6 +481,7 @@ object PlaybackEngine : VideoSessionBridge.Controller {
         tickerJob?.cancel()
         tickerJob = null
         if (player.mediaItemCount > 0) pendingPositionMs = player.currentPosition.coerceAtLeast(0L)
+        deferredAudio = null
         player.pause()
         // Handoff is confirmed before this callback. A merely paused decoder still retains
         // buffers and can keep downloading; stop releases media resources but keeps the engine.
@@ -440,10 +492,19 @@ object PlaybackEngine : VideoSessionBridge.Controller {
     }
 
     override fun play() {
+        noteInteraction()
+        val deferred = deferredAudio
+        if (deferred != null) {
+            deferredAudio = null
+            player.playWhenReady = true
+            resolveBackgroundAudio(deferred.videoId, deferred.positionMs, continueFromPlayer = player.mediaItemCount > 0)
+            return
+        }
         player.play()
     }
 
     override fun pause() {
+        noteInteraction()
         player.pause()
         saveHistoryProgress()
     }
@@ -459,6 +520,11 @@ object PlaybackEngine : VideoSessionBridge.Controller {
     override fun getDurationMs(): Long = player.duration.coerceAtLeast(0L)
 
     override fun seekTo(positionMs: Long) {
+        noteInteraction()
+        deferredAudio?.let {
+            deferredAudio = it.copy(positionMs = positionMs.coerceAtLeast(0L))
+            pendingPositionMs = positionMs.coerceAtLeast(0L)
+        }
         player.seekTo(positionMs)
     }
 
@@ -494,6 +560,8 @@ object PlaybackEngine : VideoSessionBridge.Controller {
     private fun playIndexHeadless(index: Int) {
         val video = queue.getOrNull(index) ?: return
         val videoId = video.mediaId ?: return
+        noteInteraction()
+        deferredAudio = null
         currentIsLive = false
         RemoteCastBus.cancelPending()
         player.pause()
@@ -534,7 +602,8 @@ object PlaybackEngine : VideoSessionBridge.Controller {
                     sourceHasVideo = false
                     sourceHasAudio = true
                     knownDurationMs = result.durationMs
-                    PlayerFactory.setAudioOnly(trackSelector, true)
+                    sourceLayout = result.layout
+                    PlayerFactory.setAudioOnly(trackSelector, true, result.layout)
                     PlayerFactory.replaceSource(
                         player = player,
                         source = PlaybackSources.mediaSource(result.streamUrl),

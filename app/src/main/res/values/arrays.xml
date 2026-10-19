@@ -55,6 +55,30 @@
         <item>240</item>
         <item>144</item>
     </string-array>
+    <string-array name="mobile_quality_entries">
+        <item>360p</item>
+        <item>480p (recommended)</item>
+        <item>720p</item>
+        <item>No limit</item>
+    </string-array>
+    <string-array name="mobile_quality_values" translatable="false">
+        <item>360</item>
+        <item>480</item>
+        <item>720</item>
+        <item>unlimited</item>
+    </string-array>
+    <string-array name="live_auto_stop_entries">
+        <item>After 30 minutes</item>
+        <item>After 60 minutes</item>
+        <item>After 2 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="live_auto_stop_values" translatable="false">
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+        <item>off</item>
+    </string-array>
     <string-array name="backend_entries">
         <item>ExoPlayer (recommended)</item>
         <item>WebView (compatibility)</item>

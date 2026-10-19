@@ -63,7 +63,7 @@ object ThumbnailImageLoader {
     private val decodeDispatcher = Dispatchers.IO.limitedParallelism(4)
     private val projectionDecodeDispatcher = Dispatchers.IO.limitedParallelism(1)
 
-    private val httpClient = SharedHttp.builder()
+    private val httpClient = SharedHttp.builder(DataUsageStats.Subsystem.IMAGES)
         .connectTimeout(4, TimeUnit.SECONDS)
         .readTimeout(7, TimeUnit.SECONDS)
         .callTimeout(10, TimeUnit.SECONDS)

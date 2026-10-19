@@ -114,6 +114,9 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
     private var manifestHardwareOverrideKey: String? = null
     private var currentResolvedStreamInfo: StreamResolver.VideoResult.StreamInfo? = null
     private var currentSourceIsManifest = false
+    /** Packaging of the prepared source; muxed sources cannot drop video for free. */
+    private var currentSourceLayout = SourceLayout.AUDIO_ONLY
+    private var meteredWatcher: MeteredNetworkWatcher? = null
     private val hardwareRecoveryExcludedStreamIds = linkedSetOf<String>()
     private var hardwareRecoveryAttempts = 0
     private var hardwareRecoveryStreamInFlight: String? = null
@@ -169,6 +172,10 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
         observedThermalStatus = currentThermalStatus()
         policyThermalStatus = observedThermalStatus
         ProjectionPerformanceState.register(projectionPerformanceListener)
+        // Wi-Fi <-> mobile data mid-video: re-evaluate the budget (mobile-data cap).
+        meteredWatcher = MeteredNetworkWatcher(view.context) {
+            schedulePerformanceAdaptation("metered-change")
+        }.also { it.start() }
         CarUi.bind(view)
         HeadUnitDiagnostics.event("ExoPlayerVideoFragment", "onViewCreated savedState=${savedInstanceState != null}")
         statusText = view.findViewById(R.id.status_text)
@@ -303,6 +310,8 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                 val ctx = context ?: return
                 if (SettingsRepository(ctx).isAudioOnly()) return
                 if (trackSelector?.parameters?.disabledTrackTypes?.contains(C.TRACK_TYPE_VIDEO) == true) return
+                // Hidden muxed source pinned to its lowest rung: no HW override until resumed.
+                if (trackSelector?.parameters?.forceLowestBitrate == true) return
 
                 val budget = currentVideoBudget()
                 if (currentSourceIsManifest && applyManifestHardwareAdaptiveOverride(tracks, budget, "tracks")) {
@@ -466,7 +475,7 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                 } else if (playbackState == Player.STATE_READY) {
                     stallRecoveriesWithoutReady = 0
                     // Autoplay of the next queue item then starts without the page fetch.
-                    queue.getOrNull(queueIndex + 1)?.mediaId?.let { StreamResolver.prefetch(listOf(it)) }
+                    queue.getOrNull(queueIndex + 1)?.mediaId?.let { context?.let { ctx -> StreamResolver.prefetch(ctx, listOf(it)) } }
                     HeadUnitDiagnostics.event("ExoPlayerVideoFragment", "player READY videoId=$currentVideoId pos=${exo.currentPosition} duration=${exo.duration}")
                     NowPlayingBus.updatePlayback(exo.isPlaying, exo.currentPosition, exo.duration, owner = this@ExoPlayerVideoFragment)
                     updateAudioProgressUi()
@@ -540,10 +549,13 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
 
         // Keep the current MediaSource and audio buffer when possible. Re-resolving the same
         // YouTube item here used to cause the short pause during video -> audio switching.
-        if (!wasAudioOnly && audioOnly && currentSourceHasAudioForSeamlessSwitch) {
+        // Muxed sources keep downloading video with a disabled track: reload pure audio instead.
+        if (!wasAudioOnly && audioOnly && currentSourceHasAudioForSeamlessSwitch &&
+            trackSelector?.let { PlayerFactory.effectiveLayout(it, currentSourceLayout) }?.videoCanBeDroppedForFree == true
+        ) {
             loadJob?.cancel()
             preserveSourcePosition = false
-            trackSelector?.let { PlayerFactory.setAudioOnly(it, true) }
+            trackSelector?.let { PlayerFactory.setAudioOnly(it, true, currentSourceLayout) }
             exo.playWhenReady = keepPlaying
             if (keepPlaying) exo.play()
             updateAudioProgressUi()
@@ -599,7 +611,8 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
             playbackSpeed = settings.getPlaybackSpeed(),
             thermalStatus = maxOf(policyThermalStatus, droppedFramePressureStatus),
             relaxFrameRate = relaxFrameRate,
-            metered = NetworkPolicy.isMetered(requireContext())
+            metered = meteredWatcher?.isMetered ?: NetworkPolicy.isMetered(requireContext()),
+            mobileDataQuality = settings.getMobileDataQuality()
         )
     }
 
@@ -616,6 +629,8 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
     private fun applyPerformanceBudget(reason: String) {
         val ctx = context ?: return
         if (SettingsRepository(ctx).isAudioOnly()) return
+        // Hidden muxed source pinned to its lowest rung; the resume path re-applies the budget.
+        if (trackSelector?.parameters?.forceLowestBitrate == true) return
         val budget = currentVideoBudget()
         val previous = lastAppliedVideoBudget
         if (previous == budget && reason != "tracks") return
@@ -782,7 +797,7 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
             delay(PROJECTION_FOCUS_SUSPEND_GRACE_MS)
             if (projectionSnapshot.hasWindowFocus || !projectionVisible) return@launch
             if (currentSourceHasAudioForSeamlessSwitch) {
-                trackSelector?.let { PlayerFactory.setVideoSuspended(it, true) }
+                suspendHiddenVideo()
             } else if (currentSourceHasVideo && requestedPlayWhenReady) {
                 player?.pause()
             }
@@ -796,6 +811,22 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
         }
     }
 
+    /**
+     * Projection hidden but audio continues. Separate tracks (incl. YouTube HLS with audio
+     * renditions) just disable video; a truly muxed HLS source (or one whose manifest is not
+     * loaded yet) is pinned to its lowest rung instead, which needs the HW manifest override out
+     * of the way until resume.
+     */
+    private fun suspendHiddenVideo() {
+        val selector = trackSelector ?: return
+        if (PlayerFactory.effectiveLayout(selector, currentSourceLayout).needsLowestPin) {
+            PlayerFactory.clearVideoTrackOverride(selector)
+            manifestHardwareOverrideKey = null
+        }
+        PlayerFactory.setVideoSuspended(selector, true, currentSourceLayout)
+        HeadUnitDiagnostics.event("ExoPlayerVideoFragment", "hidden-video-suspended layout=$currentSourceLayout")
+    }
+
     private fun cancelFocusSuspendAndResume() {
         focusSuspendJob?.cancel()
         focusSuspendJob = null
@@ -807,8 +838,9 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
         focusVideoSuspended = false
         if (!projectionVisible || context?.let { SettingsRepository(it).isAudioOnly() } != false) return
         trackSelector?.let {
-            PlayerFactory.applyCarVideoConstraints(it, currentVideoBudget())
+            // Unsuspend first: it drops a lowest-rung pin, then the budget is re-applied.
             PlayerFactory.setVideoSuspended(it, false)
+            PlayerFactory.applyCarVideoConstraints(it, currentVideoBudget())
         }
         playerView?.player = player
         if (requestedPlayWhenReady && player?.playWhenReady != true) player?.play()
@@ -1205,6 +1237,7 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
         if (!preserveSourcePosition) {
             currentSourceHasVideo = false
             currentSourceHasAudioForSeamlessSwitch = false
+            currentSourceLayout = SourceLayout.AUDIO_ONLY
             player?.stop()
             player?.clearMediaItems()
         }
@@ -1306,7 +1339,8 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                     if (result.durationMs > 0L) knownDurationMs = result.durationMs
                     currentSourceHasVideo = false
                     currentSourceHasAudioForSeamlessSwitch = false
-                    trackSelector?.let { PlayerFactory.setAudioOnly(it, true) }
+                    currentSourceLayout = result.layout
+                    trackSelector?.let { PlayerFactory.setAudioOnly(it, true, result.layout) }
                     playResolvedSource(
                         result.streamUrl,
                         resumePositionMs,
@@ -1498,9 +1532,10 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                     PlayerFactory.clearVideoTrackOverride(it)
                     manifestHardwareOverrideKey = null
                 }
+                // Before the budget: leaving a lowest-rung pin resets the size ceiling.
+                PlayerFactory.setAudioOnly(it, false)
                 PlayerFactory.applyCarVideoConstraints(it, budget)
                 lastAppliedVideoBudget = budget
-                PlayerFactory.setAudioOnly(it, false)
             }
             // Auto on the HU uses adaptive manifests so ABR can start on a thin rung; explicit
             // heights stay progressive under CarVideoPolicy for a predictable picture budget.
@@ -1522,6 +1557,7 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                     currentResolvedStreamInfo = result.info
                     applyResolvedProgressiveBudget(result.info)
                     currentSourceIsManifest = false
+                    currentSourceLayout = SourceLayout.MUXED_PROGRESSIVE
                     hardwareRecoveryStreamInFlight = null
                     currentIsLive = false
                     currentSourceHasVideo = true
@@ -1531,6 +1567,7 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                 is StreamResolver.VideoResult.Manifest -> {
                     currentResolvedStreamInfo = null
                     currentSourceIsManifest = true
+                    currentSourceLayout = result.layout
                     if (!hardwareRecovery) {
                         manifestHardwareExcludedTrackKeys.clear()
                         manifestHardwareFailedFormatKeys.clear()
@@ -1551,6 +1588,7 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                     currentResolvedStreamInfo = result.info
                     applyResolvedProgressiveBudget(result.info)
                     currentSourceIsManifest = false
+                    currentSourceLayout = SourceLayout.SEPARATE
                     hardwareRecoveryStreamInFlight = null
                     currentIsLive = false
                     statusText?.visibility = View.GONE
@@ -1853,8 +1891,9 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
         val settings = SettingsRepository(requireContext())
         if (!settings.isAudioOnly()) {
             trackSelector?.let {
-                PlayerFactory.applyCarVideoConstraints(it, currentVideoBudget())
+                // Unsuspend first: it drops a lowest-rung pin, then the budget is re-applied.
                 PlayerFactory.setVideoSuspended(it, false)
+                PlayerFactory.applyCarVideoConstraints(it, currentVideoBudget())
             }
             playerView?.player = player
             if (requestedPlayWhenReady && player?.playWhenReady != true) player?.play()
@@ -1886,7 +1925,7 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                 delay(PROJECTION_SUSPEND_GRACE_MS)
                 if (projectionVisible) return@launch
                 if (currentSourceHasAudioForSeamlessSwitch) {
-                    trackSelector?.let { PlayerFactory.setVideoSuspended(it, true) }
+                    suspendHiddenVideo()
                 } else if (currentSourceHasVideo && requestedPlayWhenReady) {
                     // A video-only source has no useful background payload. Pause it once the HU
                     // has genuinely been away long enough to justify releasing decode resources.
@@ -1912,6 +1951,8 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
 
     override fun onDestroyView() {
         ProjectionPerformanceState.unregister(projectionPerformanceListener)
+        meteredWatcher?.stop()
+        meteredWatcher = null
         projectionSuspendJob?.cancel()
         projectionSuspendJob = null
         focusSuspendJob?.cancel()

@@ -32,6 +32,29 @@ class SettingsRepository(context: Context) {
 
     fun setCarVideoQuality(value: String) = putString(KEY_CAR_VIDEO_QUALITY, value)
 
+    /** Height cap on metered networks for phone and head unit: `360`/`480`/`720`/`unlimited`. */
+    fun getMobileDataQuality(): String =
+        DataSaverPolicy.normalizeMobileQuality(prefs.getString(KEY_MOBILE_DATA_QUALITY, DataSaverPolicy.DEFAULT_MOBILE_QUALITY))
+
+    fun setMobileDataQuality(value: String) =
+        putString(KEY_MOBILE_DATA_QUALITY, DataSaverPolicy.normalizeMobileQuality(value))
+
+    fun cycleMobileDataQuality(): String =
+        cycle(KEY_MOBILE_DATA_QUALITY, DataSaverPolicy.MOBILE_QUALITY_VALUES, getMobileDataQuality())
+
+    /** Phone player: system/overlay Back in video mode stops playback instead of continuing as audio. */
+    fun isBackStopsPlayback(): Boolean = prefs.getBoolean(KEY_BACK_STOPS_PLAYBACK, true)
+
+    fun setBackStopsPlayback(value: Boolean) = putBoolean(KEY_BACK_STOPS_PLAYBACK, value)
+
+    /** Minutes after which a background live stream stops (`30`/`60`/`120`/`off`). */
+    fun getLiveAutoStop(): String =
+        LiveAutoStopPolicy.normalize(prefs.getString(KEY_LIVE_AUTO_STOP, LiveAutoStopPolicy.DEFAULT_MINUTES))
+
+    fun setLiveAutoStop(value: String) = putString(KEY_LIVE_AUTO_STOP, LiveAutoStopPolicy.normalize(value))
+
+    fun cycleLiveAutoStop(): String = cycle(KEY_LIVE_AUTO_STOP, LiveAutoStopPolicy.VALUES, getLiveAutoStop())
+
     /** Audio offset relative to video, used exclusively by the head-unit video renderer. */
     fun getCarLipSyncMs(): Int = CarLipSync.clamp(prefs.getInt(KEY_CAR_LIP_SYNC_MS, 0))
 
@@ -169,6 +192,9 @@ class SettingsRepository(context: Context) {
         const val KEY_PHONE_AUDIO_ONLY = "phone_audio_only"
         const val KEY_VIDEO_QUALITY = "video_quality"
         const val KEY_CAR_VIDEO_QUALITY = "car_video_quality"
+        const val KEY_MOBILE_DATA_QUALITY = "mobile_data_quality"
+        const val KEY_BACK_STOPS_PLAYBACK = "back_stops_playback"
+        const val KEY_LIVE_AUTO_STOP = "live_auto_stop"
         const val KEY_CAR_LIP_SYNC_MS = "car_lip_sync_ms"
         const val KEY_THUMBNAIL_QUALITY = "thumbnail_quality"
         const val KEY_PHONE_BROWSE_CARDS = "phone_browse_cards"

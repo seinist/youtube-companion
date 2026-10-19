@@ -197,6 +197,12 @@ class BrowseFacade(private val context: Context) {
 
     suspend fun channelAvatar(channelId: String): String? = withContext(Dispatchers.IO) {
         channelAvatarCache.get(channelId)?.let { return@withContext it }
+        // The subscription list already carries most avatars; a channel browse (~100-300 KB)
+        // only for its picture is the last resort.
+        knownChannelAvatar(channelId)?.let { url ->
+            channelAvatarCache.put(channelId, url)
+            return@withContext url
+        }
         if (!isTvSignedIn()) return@withContext null
         dependencies.avatarLocks[(channelId.hashCode() and Int.MAX_VALUE) % dependencies.avatarLocks.size].withLock {
             channelAvatarCache.get(channelId)?.let { return@withLock it }
@@ -208,6 +214,18 @@ class BrowseFacade(private val context: Context) {
                 null
             }
         }
+    }
+
+    /** Avatar from an already loaded channel list (cache or the shared feed store), no request. */
+    private fun knownChannelAvatar(channelId: String): String? {
+        val lists = sequenceOf(
+            BrowseListCache.get<List<HybridChannel>>(BrowseListCache.KEY_CHANNELS),
+            sharedFeedStore?.subscriptions?.value?.channels
+        )
+        return lists.filterNotNull()
+            .flatMap { it.asSequence() }
+            .firstOrNull { it.channelId == channelId && !it.thumbnailUrl.isNullOrBlank() }
+            ?.thumbnailUrl
     }
 
     private data class CachedSubscriptionFeed(

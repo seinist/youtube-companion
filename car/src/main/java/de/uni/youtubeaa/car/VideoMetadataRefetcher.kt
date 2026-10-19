@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
  * Uses YouTube's public oEmbed response, so it does not consume Data API quota or require login.
  */
 class VideoMetadataRefetcher(
-    private val http: OkHttpClient = SharedHttp.builder()
+    private val http: OkHttpClient = SharedHttp.builder(DataUsageStats.Subsystem.OTHER)
         .connectTimeout(8, TimeUnit.SECONDS)
         .readTimeout(8, TimeUnit.SECONDS)
         .build()

@@ -41,6 +41,9 @@ object PlaybackSources {
      * Mirrors NewPipe's own YoutubeHttpDataSource: client UA for app clients, browser UA plus
      * Referer/Origin for web and manifest URLs.
      */
+    /** Headers the players send for [url]; also used for the resolver's own manifest reads. */
+    internal fun requestHeaders(url: String): Map<String, String> = requestHeadersFor(url)
+
     private fun requestHeadersFor(url: String): Map<String, String> {
         val userAgent = when {
             YoutubeParsingHelper.isVisionOsStreamingUrl(url) -> YoutubeParsingHelper.getVisionOsUserAgent(null)
