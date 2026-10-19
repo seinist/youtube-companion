@@ -11,6 +11,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import de.uni.youtubeaa.car.setBrowseExtras
 import de.uni.youtubeaa.car.awaitBytes
 import de.uni.youtubeaa.car.publishedAtMs
+import de.uni.youtubeaa.car.ThumbnailSizing
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -526,21 +527,15 @@ class InnerTubeClient(
      */
     private fun findImageUrl(node: Any?): String? {
         var bestUrl: String? = null
-        var bestArea = -1L
+        // Every listed size; the smallest one that is still large enough wins (see pickSource).
+        val options = mutableListOf<Triple<String, Int, Int>>()
 
         fun considerArray(array: JSONArray?) {
             if (array == null) return
             for (i in 0 until array.length()) {
                 val item = array.optJSONObject(i) ?: continue
                 val rawUrl = item.optString("url").takeIf { it.isNotBlank() } ?: continue
-                val url = normalizeImageUrl(rawUrl)
-                val width = item.optLong("width", 0L)
-                val height = item.optLong("height", 0L)
-                val area = width * height
-                if (bestUrl == null || area >= bestArea) {
-                    bestUrl = url
-                    bestArea = area
-                }
+                options += Triple(normalizeImageUrl(rawUrl), item.optInt("width", 0), item.optInt("height", 0))
             }
         }
 
@@ -560,7 +555,7 @@ class InnerTubeClient(
             }
         }
         scan(node)
-        return bestUrl
+        return ThumbnailSizing.pickSource(options) ?: bestUrl
     }
 
     private fun normalizeImageUrl(url: String): String = when {
@@ -572,20 +567,13 @@ class InnerTubeClient(
 
     private fun firstThumbnail(thumbObj: JSONObject?): String? {
         val thumbs = thumbObj?.optJSONArray("thumbnails") ?: return null
-        var bestUrl: String? = null
-        var bestArea = -1L
+        val options = mutableListOf<Triple<String, Int, Int>>()
         for (i in 0 until thumbs.length()) {
             val thumb = thumbs.optJSONObject(i) ?: continue
             val url = thumb.optString("url").takeIf { it.isNotBlank() }?.let(::normalizeImageUrl) ?: continue
-            val width = thumb.optLong("width", 0L)
-            val height = thumb.optLong("height", 0L)
-            val area = width * height
-            if (bestUrl == null || area >= bestArea) {
-                bestUrl = url
-                bestArea = area
-            }
+            options += Triple(url, thumb.optInt("width", 0), thumb.optInt("height", 0))
         }
-        return bestUrl
+        return ThumbnailSizing.pickSource(options)
     }
 
     private data class ClientProfile(

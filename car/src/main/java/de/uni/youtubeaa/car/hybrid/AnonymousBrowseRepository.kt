@@ -7,6 +7,7 @@ import de.uni.youtubeaa.car.AppText
 import de.uni.youtubeaa.car.BrowseListCache
 import de.uni.youtubeaa.car.R
 import de.uni.youtubeaa.car.StreamResolver
+import de.uni.youtubeaa.car.ThumbnailSizing
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.schabi.newpipe.extractor.ServiceList
@@ -86,7 +87,10 @@ class AnonymousBrowseRepository {
             else -> null
         }?.takeIf { it.length >= 6 }
             ?: return null
-        val thumb = thumbnails.maxByOrNull { it.height }?.url
+        // Smallest listed size that still fills the largest view; hq720 is then resized by name.
+        val thumb = ThumbnailSizing.pickSource(
+            thumbnails.map { Triple(it.url, it.width.coerceAtLeast(0), it.height.coerceAtLeast(0)) }
+        )
         return MediaDescriptionCompat.Builder()
             .setMediaId(id)
             .setTitle(name ?: id)

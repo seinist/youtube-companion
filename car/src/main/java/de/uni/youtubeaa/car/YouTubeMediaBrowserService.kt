@@ -593,7 +593,7 @@ class YouTubeMediaBrowserService : MediaBrowserServiceCompat() {
                     .setMediaId(VIDEO_PREFIX + entry.videoId)
                     .setTitle(entry.title)
                     .setSubtitle(entry.channelTitle)
-                    .setIconUri(entry.thumbnailUrl?.let { android.net.Uri.parse(it) })
+                    .setIconUri(artUri(entry.thumbnailUrl))
                     .build(),
                 MediaItem.FLAG_PLAYABLE
             )
@@ -651,12 +651,19 @@ class YouTubeMediaBrowserService : MediaBrowserServiceCompat() {
             .setSubtitle(this.subtitleWithAge())
             .setDescription(this.description)
             .setIconBitmap(this.iconBitmap)
-            .setIconUri(this.iconUri)
+            .setIconUri(artUri(this.iconUri?.toString()))
             .setMediaUri(this.mediaUri)
             .setExtras(this.extras)
             .build()
         return MediaItem(description, MediaItem.FLAG_PLAYABLE)
     }
+
+    /**
+     * Android Auto downloads iconUri images itself (outside this app's cache and data counter),
+     * so it gets a URL sized for its rows instead of the 720p/900px original.
+     */
+    private fun artUri(url: String?, targetPx: Int = if (settingsRepository.isCarBrowseCardsEnabled()) AA_GRID_ART_PX else AA_LIST_ART_PX): Uri? =
+        url?.takeIf { it.isNotBlank() }?.let { Uri.parse(ThumbnailSizing.sizedUrl(it, targetPx)) }
 
     private fun browseContentStyle(): Int =
         if (settingsRepository.isCarBrowseCardsEnabled())
@@ -672,7 +679,7 @@ class YouTubeMediaBrowserService : MediaBrowserServiceCompat() {
         val description = MediaDescriptionCompat.Builder()
             .setMediaId(CHANNEL_PREFIX + channelId)
             .setTitle(title)
-            .setIconUri(thumbnailUrl?.let { Uri.parse(it) })
+            .setIconUri(artUri(thumbnailUrl, AA_AVATAR_PX))
             .setExtras(extras)
             .build()
         return MediaItem(description, MediaItem.FLAG_BROWSABLE)
@@ -718,6 +725,9 @@ class YouTubeMediaBrowserService : MediaBrowserServiceCompat() {
         const val CHANNEL_PREFIX = "channel:"
         private const val REFRESH_PREFIX = "refresh:"
         private const val LIST_STALE_MS = 5 * 60_000L
+        private const val AA_LIST_ART_PX = 320
+        private const val AA_GRID_ART_PX = 480
+        private const val AA_AVATAR_PX = 192
         private const val MAX_MERGED_ITEMS = 200
         const val VIDEO_PREFIX = "video:"
         private const val TAG = "YouTubeMediaBrowser"
