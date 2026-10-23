@@ -12,9 +12,14 @@ import androidx.media3.exoplayer.DefaultLivePlaybackSpeedControl
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.LoadControl
+import androidx.media3.exoplayer.Renderer
+import androidx.media3.exoplayer.analytics.PlayerId
 import androidx.media3.exoplayer.hls.HlsManifest
 import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.TrackGroupArray
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.exoplayer.trackselection.ExoTrackSelection
+import androidx.media3.exoplayer.upstream.Allocator
 
 /** Shared ExoPlayer setup: audio-only mode disables video tracks to save bandwidth. */
 @OptIn(markerClass = [UnstableApi::class])
@@ -47,7 +52,7 @@ object PlayerFactory {
                 )
                 .setPrioritizeTimeOverSizeThresholds(true)
                 .build(),
-            appContext
+            isMetered = { NetworkPolicy.isMeteredCached(appContext) }
         )
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
@@ -138,20 +143,55 @@ object PlayerFactory {
      * Players are long-lived (the engine survives screens), so the limit is evaluated per call
      * instead of being baked into the DefaultLoadControl. Start/rebuffer thresholds stay as is.
      */
-    private class MeteredLoadControl(
-        private val delegate: DefaultLoadControl,
-        private val appContext: Context
-    ) : LoadControl by delegate {
+    internal class MeteredLoadControl(
+        private val delegate: LoadControl,
+        private val isMetered: () -> Boolean
+    ) : LoadControl {
         private val meteredMaxBufferUs =
             DataSaverPolicy.maxBufferMs(metered = true, defaultMaxBufferMs = MAX_BUFFER_MS) * 1_000L
+
+        // LoadControl's modern PlayerId/Parameters methods have throwing compatibility defaults.
+        // Kotlin interface delegation only emits forwards for abstract members, so relying on
+        // `LoadControl by delegate` silently selected those defaults and crashed every player at
+        // construction (`getBackBufferDurationUs not implemented`). Forward the complete current
+        // contract explicitly and customize only the metered loading decision.
+        override fun onPrepared(playerId: PlayerId) = delegate.onPrepared(playerId)
+
+        override fun onTracksSelected(
+            parameters: LoadControl.Parameters,
+            trackGroups: TrackGroupArray,
+            trackSelections: Array<out ExoTrackSelection?>
+        ) = delegate.onTracksSelected(parameters, trackGroups, trackSelections)
+
+        override fun onStopped(playerId: PlayerId) = delegate.onStopped(playerId)
+
+        override fun onReleased(playerId: PlayerId) = delegate.onReleased(playerId)
+
+        override fun getAllocator(playerId: PlayerId): Allocator = delegate.getAllocator(playerId)
+
+        override fun getBackBufferDurationUs(playerId: PlayerId): Long =
+            delegate.getBackBufferDurationUs(playerId)
+
+        override fun retainBackBufferFromKeyframe(playerId: PlayerId): Boolean =
+            delegate.retainBackBufferFromKeyframe(playerId)
 
         override fun shouldContinueLoading(parameters: LoadControl.Parameters): Boolean {
             val wanted = delegate.shouldContinueLoading(parameters)
             if (!wanted) return false
             // Never starve playback below the regular minimum buffer.
             if (parameters.bufferedDurationUs < MIN_BUFFER_MS * 1_000L) return true
-            return !(parameters.bufferedDurationUs >= meteredMaxBufferUs && NetworkPolicy.isMeteredCached(appContext))
+            return !(parameters.bufferedDurationUs >= meteredMaxBufferUs && isMetered())
         }
+
+        override fun shouldStartPlayback(parameters: LoadControl.Parameters): Boolean =
+            delegate.shouldStartPlayback(parameters)
+
+        override fun shouldContinuePreloading(
+            playerId: PlayerId,
+            timeline: Timeline,
+            mediaPeriodId: MediaSource.MediaPeriodId,
+            startPositionUs: Long
+        ): Boolean = delegate.shouldContinuePreloading(playerId, timeline, mediaPeriodId, startPositionUs)
     }
 
     /** Media3's default lower bound; only catch-up (speeding up) is disabled. */
