@@ -1130,7 +1130,13 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
         bitrate = settings.getAudioBitrate()
     )
 
-    private fun playIndex(index: Int, resumePositionMs: Long = 0L, forcePlay: Boolean = true, resetRecovery: Boolean = true, preserveSource: Boolean = false) {
+    private fun playIndex(
+        index: Int,
+        resumePositionMs: Long = 0L,
+        forcePlay: Boolean = true,
+        resetRecovery: Boolean = true,
+        preserveSource: Boolean = false
+    ) {
         val video = queue.getOrNull(index) ?: return
         RemoteCastBus.cancelPending()
         PlaybackEngine.cancelPendingLoad()
@@ -1227,9 +1233,9 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
         loadJob?.cancel()
         loadJob = lifecycleScope.launch {
             val requested = settings.getVideoQuality()
-            // Auto on the phone uses adaptive manifests so ABR can start low; explicit heights
-            // stay on progressive itags for a predictable picture size.
-            val preferAdaptive = requested.equals("auto", ignoreCase = true)
+            // Adaptive playback avoids the repeatable read stalls seen with fixed progressive
+            // YouTube URLs. The TrackSelector now enforces resolution, frame-rate, codec order
+            // and a real bitrate ceiling, so HLS/DASH no longer means unbounded data use.
             // Data saver: Auto stops at 720p30; on mobile data the user's cap (default 480p)
             // limits every setting, explicit qualities and a progressive fallback included.
             val metered = meteredWatcher?.isMetered ?: NetworkPolicy.isMetered(this@VideoPlayerActivity)
@@ -1245,7 +1251,7 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
                     quality,
                     audioPrefs(),
                     maxFps = DataSaverPolicy.phoneResolveMaxFps(requested),
-                    preferAdaptive = preferAdaptive
+                    preferAdaptive = true
                 )
             ) {
                 is StreamResolver.VideoResult.Muxed -> {
@@ -1423,7 +1429,12 @@ class VideoPlayerActivity : AppCompatActivity(), VideoSessionBridge.Controller {
         mainHandler.postDelayed({
             if (!isFinishing && !isDestroyed && VideoSessionBridge.isOwner(this)) {
                 streamResolver.invalidate(queue.getOrNull(queueIndex)?.mediaId ?: return@postDelayed)
-                playIndex(queueIndex, resumePositionMs = position, forcePlay = keepPlaying, resetRecovery = false)
+                playIndex(
+                    queueIndex,
+                    resumePositionMs = position,
+                    forcePlay = keepPlaying,
+                    resetRecovery = false
+                )
             }
         }, RECOVERY_RETRY_DELAY_MS)
     }

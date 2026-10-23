@@ -234,6 +234,7 @@ object PlayerFactory {
             // long/short/pixel budget once tracks are known.
             .setMaxVideoSize(budget.maxLongSide, budget.maxLongSide)
             .setMaxVideoFrameRate(budget.maxSourceFps)
+            .setMaxVideoBitrate(budget.maxVideoBitrate)
             .setExceedVideoConstraintsIfNecessary(false)
             .setExceedRendererCapabilitiesIfNecessary(false)
             .setAllowVideoMixedDecoderSupportAdaptiveness(false)
@@ -244,6 +245,7 @@ object PlayerFactory {
             "PlayerFactory",
             "car-video-budget quality=${budget.quality} effectiveQuality=${budget.effectiveQuality} " +
                 "maxLong=${budget.maxLongSide} maxShort=${budget.maxShortSide} maxPixels=${budget.maxPixels} " +
+                "maxVideoBitrate=${budget.maxVideoBitrate} " +
                 "projectionFps=${budget.projectionFps} speed=${budget.playbackSpeed} " +
                 "maxSourceFps=${budget.maxSourceFps} thermal=${budget.thermalStatus} " +
                 "relaxFps=${budget.relaxFrameRate} mimeOrder=${preferredMimes.joinToString()} " +
@@ -266,15 +268,20 @@ object PlayerFactory {
      * progressive itag is chosen by the resolver with the same limits.
      */
     fun applyPhoneVideoCeiling(trackSelector: DefaultTrackSelector, ceiling: DataSaverPolicy.Ceiling) {
+        val preferredMimes = HardwareVideoCodecs.preferredMimeTypes()
         trackSelector.setParameters(
             trackSelector.buildUponParameters()
                 .setMaxVideoSize(ceiling.maxLongSide, ceiling.maxLongSide)
                 .setMaxVideoFrameRate(ceiling.maxFps)
+                .setMaxVideoBitrate(ceiling.maxVideoBitrate)
+                .setPreferredVideoMimeTypes(*preferredMimes)
+                .setAllowVideoMixedMimeTypeAdaptiveness(false)
                 .setExceedVideoConstraintsIfNecessary(true)
         )
         HeadUnitDiagnostics.event(
             "PlayerFactory",
-            "phone-video-ceiling maxLong=${ceiling.maxLongSide} maxFps=${ceiling.maxFps}"
+            "phone-video-ceiling maxLong=${ceiling.maxLongSide} maxFps=${ceiling.maxFps} " +
+                "maxVideoBitrate=${ceiling.maxVideoBitrate} mimeOrder=${preferredMimes.joinToString()}"
         )
     }
 

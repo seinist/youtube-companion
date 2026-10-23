@@ -111,6 +111,14 @@ class VideoStreamChoiceTest {
     }
 
     @Test
+    fun lowerAdvertisedBitrateBeatsCodecLabelAtTheSamePictureQuality() {
+        val av1High = S(1080, "av01.0.08M.08", bitrate = 3_000_000)
+        val vp9Low = S(1080, "vp9", bitrate = 1_800_000)
+        val withHwAv1 = { _: Codec, _: String?, _: Int, _: Int, _: Int -> true }
+        assertEquals(vp9Low, pick(listOf(av1High, vp9Low), hw = withHwAv1, maxFps = 30))
+    }
+
+    @Test
     fun hardwareAndQualityBeatMuxedConvenience() {
         val muxedSoftware = S(720, "av01.0.05M.08", sourceCost = 0)
         val separateHardware = S(720, "avc1.4d401f", sourceCost = 1)
@@ -122,6 +130,13 @@ class VideoStreamChoiceTest {
         val muxed = S(720, "avc1.4d401f", sourceCost = 0)
         val separate = S(720, "avc1.4d401f", sourceCost = 1)
         assertEquals(muxed, pick(listOf(separate, muxed), maxFps = 30))
+    }
+
+    @Test
+    fun lowerTotalBitrateBeatsMuxedConvenience() {
+        val muxed = S(720, "avc1.4d401f", sourceCost = 0, bitrate = 2_000_000)
+        val separate = S(720, "avc1.4d401f", sourceCost = 1, bitrate = 1_200_000)
+        assertEquals(separate, pick(listOf(muxed, separate), maxFps = 30))
     }
 
     @Test

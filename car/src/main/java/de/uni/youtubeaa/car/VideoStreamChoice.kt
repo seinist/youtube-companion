@@ -43,7 +43,7 @@ internal object VideoStreamChoice {
         maxFps: Int? = null,
         /** Lower is preferred, but only after HW/FPS/quality/codec have been decided. */
         sourceCostOf: (T) -> Int = { 0 },
-        /** Lower bitrate wins only as the final deterministic/performance tie-breaker. */
+        /** Estimated total wire bitrate; lower wins once picture/HW/FPS safety is equal. */
         bitrateOf: (T) -> Int = { 0 },
         /** Exact orientation-independent picture budget (long side, short side and pixel count). */
         withinBudgetOf: ((T) -> Boolean)? = null
@@ -121,10 +121,13 @@ internal object VideoStreamChoice {
         return candidates.minWithOrNull(
             compareBy<T> { if (lowest) heightOf(it) else -heightOf(it) }
                 .thenBy { exactCapabilityCost(it) }
-                .thenBy { codecPreference(it) }
                 .thenBy { fpsOf(it).takeIf { fps -> fps > 0 } ?: Int.MAX_VALUE }
-                .thenBy { sourceCostOf(it) }
+                // Advertised bitrate is the direct data-cost signal. Prefer it before codec and
+                // muxing convenience: a nominally efficient codec can still be encoded at a
+                // higher rate, and a muxed stream can cost more than separate video + audio.
                 .thenBy { bitrateOf(it).takeIf { bitrate -> bitrate > 0 } ?: Int.MAX_VALUE }
+                .thenBy { codecPreference(it) }
+                .thenBy { sourceCostOf(it) }
         )
     }
 }

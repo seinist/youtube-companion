@@ -1537,11 +1537,9 @@ class ExoPlayerVideoFragment : Fragment(), VideoSessionBridge.Controller {
                 PlayerFactory.applyCarVideoConstraints(it, budget)
                 lastAppliedVideoBudget = budget
             }
-            // Auto on the HU uses adaptive manifests so ABR can start on a thin rung; explicit
-            // heights stay progressive under CarVideoPolicy for a predictable picture budget.
-            // A stall recovery also goes adaptive: reloading the same fixed itag stalled again on
-            // a throttled/weak link (11 s freeze in one HU log), while ABR can drop to a thin rung.
-            val preferAdaptive = quality.equals("auto", ignoreCase = true) || stallRecovery
+            // Keep VOD adaptive for projection reliability. The player-level bitrate, codec,
+            // size and FPS constraints bound HLS/DASH traffic before Media3 selects a rung.
+            val preferAdaptive = true
             when (val result = streamResolver.resolveVideoStream(
                 videoId,
                 quality,

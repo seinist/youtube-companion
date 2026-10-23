@@ -137,13 +137,39 @@ object DataSaverPolicy {
     /** Read-ahead limit on metered networks (skips and seeks throw the read-ahead away). */
     const val METERED_MAX_BUFFER_MS = 15_000
 
-    data class Ceiling(val maxLongSide: Int, val maxFps: Int) {
-        val limited: Boolean get() = maxLongSide != Int.MAX_VALUE || maxFps != Int.MAX_VALUE
+    data class Ceiling(
+        val maxLongSide: Int,
+        val maxFps: Int,
+        val maxVideoBitrate: Int
+    ) {
+        val limited: Boolean
+            get() = maxLongSide != Int.MAX_VALUE || maxFps != Int.MAX_VALUE || maxVideoBitrate != Int.MAX_VALUE
 
         companion object {
-            val NONE = Ceiling(Int.MAX_VALUE, Int.MAX_VALUE)
+            val NONE = Ceiling(Int.MAX_VALUE, Int.MAX_VALUE, Int.MAX_VALUE)
         }
     }
+
+    /**
+     * Conservative upper bounds for adaptive tracks. Resolution alone is not a data budget:
+     * YouTube can expose AVC/HLS variants at several times the bitrate of AV1/VP9 at the same
+     * height. These remain soft on the phone (Media3 may exceed them if no playable track exists)
+     * and are paired with progressive selection by actual advertised bitrate.
+     */
+    fun maxVideoBitrateForHeight(height: Int): Int = when {
+        height <= 144 -> 180_000
+        height <= 240 -> 300_000
+        height <= 360 -> 500_000
+        height <= 480 -> 800_000
+        height <= 720 -> 1_500_000
+        height <= 1080 -> 2_500_000
+        height <= 1440 -> 5_000_000
+        height <= 2160 -> 10_000_000
+        else -> Int.MAX_VALUE
+    }
+
+    fun maxVideoBitrateForQuality(quality: String): Int =
+        maxVideoBitrateForHeight(CarVideoPolicy.qualityShortSide(quality))
 
     fun normalizeMobileQuality(value: String?): String =
         value?.takeIf { it in MOBILE_QUALITY_VALUES } ?: DEFAULT_MOBILE_QUALITY
@@ -182,14 +208,12 @@ object DataSaverPolicy {
     fun phoneCeiling(requested: String, metered: Boolean, mobileQuality: String): Ceiling {
         val auto = isAuto(requested)
         val cap = if (metered) meteredCapHeight(mobileQuality) else null
-        val height = when {
-            auto -> minOf(PHONE_AUTO_MAX_HEIGHT, cap ?: Int.MAX_VALUE)
-            cap != null -> minOf(CarVideoPolicy.qualityShortSide(requested), cap)
-            else -> null
-        }
+        val requestedHeight = if (auto) PHONE_AUTO_MAX_HEIGHT else CarVideoPolicy.qualityShortSide(requested)
+        val height = minOf(requestedHeight, cap ?: Int.MAX_VALUE)
         return Ceiling(
-            maxLongSide = height?.let { CarVideoPolicy.qualityLongSide(it.toString()) } ?: Int.MAX_VALUE,
-            maxFps = if (auto) PHONE_AUTO_MAX_FPS else Int.MAX_VALUE
+            maxLongSide = CarVideoPolicy.qualityLongSide(height.toString()),
+            maxFps = if (auto) PHONE_AUTO_MAX_FPS else Int.MAX_VALUE,
+            maxVideoBitrate = maxVideoBitrateForHeight(height)
         )
     }
 

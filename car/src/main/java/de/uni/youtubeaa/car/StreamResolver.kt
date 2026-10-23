@@ -79,6 +79,13 @@ class StreamResolver {
             val cached = extractorCache[videoId] ?: return false
             SystemClock.elapsedRealtime() - cached.fetchedAtElapsedMs < EXTRACTOR_MAX_AGE_MS
         }
+
+        /** NewPipe reports YouTube audio ABR in kbit/s (for example 160), some services use bit/s. */
+        internal fun audioBitrateBitsPerSecond(reported: Int): Int = when {
+            reported <= 0 -> 0
+            reported < 10_000 -> reported.toLong().times(1_000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+            else -> reported
+        }
     }
 
     data class AudioPrefs(
@@ -205,8 +212,9 @@ class StreamResolver {
      * Live streams use HLS/DASH manifests ([VideoResult.Manifest]).
      * [quality]: `auto` or an explicit vertical resolution such as `2160`, `1440`, `1080`, `720`, ….
      * [maxFps]: projected frame-rate ceiling; higher rates are used only when no stream at or below it exists.
-     * [preferAdaptive]: when true (phone/HU Auto), prefer HLS/DASH so Media3 ABR can start on a
-     *   thin low ladder rung instead of waiting for several seconds of a fixed progressive itag.
+     * [preferAdaptive]: prefer HLS/DASH after callers applied a size/FPS/codec/bitrate budget to
+     *   Media3. When false or no manifest exists, progressive candidates are ranked by their
+     *   advertised total bitrate.
      */
     suspend fun resolveVideoStream(
         videoId: String,
@@ -223,6 +231,8 @@ class StreamResolver {
                 val extractor = fetchExtractor(videoId)
                 val live = isLiveOrPostLive(extractor.streamType)
                 val effectiveMaxFps = videoBudget?.maxSourceFps ?: maxFps
+                val maxVideoBitrate = videoBudget?.maxVideoBitrate
+                    ?: DataSaverPolicy.maxVideoBitrateForQuality(quality)
 
                 // Live / post-live almost never have usable progressive itags — use HLS/DASH first.
                 if (live) {
@@ -232,13 +242,14 @@ class StreamResolver {
                     }
                 }
 
-                // Phone/HU Auto: adaptive first. A fixed high progressive needs a large initial
-                // download before bufferForPlaybackMs is reached; ABR can begin on a lower rung.
+                // The caller applies the bitrate and codec budget to Media3 before this source is
+                // loaded. Live playback already returned above.
                 if (preferAdaptive) {
                     resolveManifestUrl(extractor, live = false)?.let {
                         HeadUnitDiagnostics.event(
                             "StreamResolver",
-                            "video videoId=$videoId source=manifest-adaptive-preferred layout=${it.layout} quality=$quality maxFps=$effectiveMaxFps"
+                            "video videoId=$videoId source=manifest-adaptive layout=${it.layout} quality=$quality " +
+                                "maxFps=$effectiveMaxFps maxVideoBitrate=$maxVideoBitrate"
                         )
                         return@withContext VideoResult.Manifest(it.url, isLive = false, layout = it.layout)
                     }
@@ -263,6 +274,15 @@ class StreamResolver {
                     bestAudio.audioTrackType == AudioTrackType.ORIGINAL
 
                 data class Candidate(val stream: VideoStream, val muxed: Boolean)
+
+                val separateAudioBitrate = bestAudio?.averageBitrate
+                    ?.let(::audioBitrateBitsPerSecond) ?: 0
+                fun estimatedTotalBitrate(candidate: Candidate): Int {
+                    val videoBitrate = candidate.stream.bitrate.takeIf { it > 0 } ?: return 0
+                    if (candidate.muxed || separateAudioBitrate <= 0) return videoBitrate
+                    return videoBitrate.toLong().plus(separateAudioBitrate)
+                        .coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                }
 
                 // Rank muxed and video-only streams together. The old two-stage selection picked
                 // a muxed stream before comparing its HW suitability with video-only itags.
@@ -293,14 +313,23 @@ class StreamResolver {
                     allCandidates
                 }
 
+                // Treat the cap as a preference here: if YouTube exposes no known stream below
+                // it, retain the candidates and let playback continue. Media3 applies the same
+                // cap to adaptive manifests (soft on phone, strict on the head unit).
+                val bitratePreferred = hwFiltered.filter { candidate ->
+                    val bitrate = candidate.stream.bitrate
+                    bitrate <= 0 || maxVideoBitrate == Int.MAX_VALUE || bitrate <= maxVideoBitrate
+                }.ifEmpty { hwFiltered }
+
                 HeadUnitDiagnostics.event(
                     "StreamResolver",
-                    "video-candidates videoId=$videoId count=${hwFiltered.size} quality=$quality " +
+                    "video-candidates videoId=$videoId count=${hwFiltered.size} bitratePreferred=${bitratePreferred.size} quality=$quality " +
                         "maxFps=$effectiveMaxFps projectionFps=${videoBudget?.projectionFps} " +
+                        "maxVideoBitrate=$maxVideoBitrate audioBitrate=$separateAudioBitrate " +
                         "speed=${videoBudget?.playbackSpeed} thermal=${videoBudget?.thermalStatus} " +
                         "requireHardware=$requireHardware excluded=${excludedStreamIds.size}"
                 )
-                hwFiltered.take(MAX_VIDEO_CANDIDATE_LOGS).forEach { candidate ->
+                bitratePreferred.take(MAX_VIDEO_CANDIDATE_LOGS).forEach { candidate ->
                     val stream = candidate.stream
                     val capability = hardwareCapability(stream, videoBudget)
                     val family = VideoStreamChoice.familyOf(stream.codec)
@@ -312,7 +341,8 @@ class StreamResolver {
                         "StreamResolver",
                         "video-candidate videoId=$videoId source=${if (candidate.muxed) "muxed" else "separate"} " +
                             "itag=${stream.itag} id=${streamKey(stream)} size=${stream.width}x${stream.height} " +
-                            "fps=${stream.fps} effectiveDecodeFps=$effectiveDecodeFps bitrate=${stream.bitrate} codec=${stream.codec} " +
+                            "fps=${stream.fps} effectiveDecodeFps=$effectiveDecodeFps videoBitrate=${stream.bitrate} " +
+                            "estimatedTotalBitrate=${estimatedTotalBitrate(candidate)} codec=${stream.codec} " +
                             "delivery=${stream.deliveryMethod} hardwareSizeRate=$sizeRateHardware " +
                             "hardwareExactHint=${capability.supported} " +
                             "decoderHint=${capability.decoderName ?: "none"}"
@@ -320,7 +350,7 @@ class StreamResolver {
                 }
 
                 val selected = VideoStreamChoice.pick(
-                    hwFiltered,
+                    bitratePreferred,
                     quality,
                     widthOf = { it.stream.width },
                     heightOf = { it.stream.height },
@@ -342,7 +372,7 @@ class StreamResolver {
                     // Source type is deliberately late in the score: HW capability and requested
                     // quality beat the convenience of a muxed stream.
                     sourceCostOf = { if (it.muxed) 0 else 1 },
-                    bitrateOf = { it.stream.bitrate },
+                    bitrateOf = { estimatedTotalBitrate(it) },
                     withinBudgetOf = videoBudget?.let { budget ->
                         { candidate -> budget.fits(candidate.stream.width, candidate.stream.height) }
                     }
@@ -350,27 +380,35 @@ class StreamResolver {
 
                 if (selected != null && selected.muxed) {
                     val selectedMuxed = selected.stream
+                    val totalBitrate = estimatedTotalBitrate(selected)
                     val url = selectedMuxed.content.takeIf { it.isNotBlank() }
                         ?: return@withContext VideoResult.Error(AppText.get(R.string.stream_error_muxed_url_missing))
-                    logVideoSelection(videoId, "muxed", selectedMuxed, quality, effectiveMaxFps, videoBudget)
+                    logVideoSelection(
+                        videoId, "muxed", selectedMuxed, quality, effectiveMaxFps,
+                        maxVideoBitrate, totalBitrate, videoBudget
+                    )
                     return@withContext VideoResult.Muxed(
                         url,
                         selectedMuxed.height,
-                        streamInfo(selectedMuxed, "muxed")
+                        streamInfo(selectedMuxed, "muxed", totalBitrate)
                     )
                 }
 
                 if (selected != null) {
                     val selectedVideo = selected.stream
+                    val totalBitrate = estimatedTotalBitrate(selected)
                     val videoUrl = selectedVideo.content.takeIf { it.isNotBlank() }
                         ?: return@withContext VideoResult.Error(AppText.get(R.string.stream_error_video_url_missing))
                     val audioUrl = bestAudio?.content?.takeIf { it.isNotBlank() }
-                    logVideoSelection(videoId, "separate", selectedVideo, quality, effectiveMaxFps, videoBudget)
+                    logVideoSelection(
+                        videoId, "separate", selectedVideo, quality, effectiveMaxFps,
+                        maxVideoBitrate, totalBitrate, videoBudget
+                    )
                     return@withContext VideoResult.Separate(
                         videoUrl,
                         audioUrl,
                         selectedVideo.height,
-                        streamInfo(selectedVideo, "separate")
+                        streamInfo(selectedVideo, "separate", totalBitrate)
                     )
                 }
 
@@ -415,6 +453,8 @@ class StreamResolver {
         stream: VideoStream,
         quality: String,
         maxFps: Int?,
+        maxVideoBitrate: Int,
+        estimatedTotalBitrate: Int,
         videoBudget: CarVideoPolicy.Budget?
     ) {
         val capability = hardwareCapability(stream, videoBudget)
@@ -429,7 +469,8 @@ class StreamResolver {
                 "client=${streamClient(stream.content)} " +
                 "quality=$quality effectiveQuality=${videoBudget?.effectiveQuality ?: quality} " +
                 "size=${stream.width}x${stream.height} fps=${stream.fps} effectiveDecodeFps=$effectiveDecodeFps " +
-                "bitrate=${stream.bitrate} codec=${stream.codec} delivery=${stream.deliveryMethod} " +
+                "videoBitrate=${stream.bitrate} estimatedTotalBitrate=$estimatedTotalBitrate " +
+                "maxVideoBitrate=$maxVideoBitrate codec=${stream.codec} delivery=${stream.deliveryMethod} " +
                 "hardwareSizeRate=$sizeRateHardware hardwareExactHint=${capability.supported} " +
                 "decoderHint=${capability.decoderName ?: "none"} maxFps=$maxFps"
         )
@@ -453,7 +494,7 @@ class StreamResolver {
     private fun streamKey(stream: VideoStream): String =
         stream.id.takeIf { it.isNotBlank() } ?: stream.itag.toString()
 
-    private fun streamInfo(stream: VideoStream, source: String): VideoResult.StreamInfo {
+    private fun streamInfo(stream: VideoStream, source: String, estimatedTotalBitrate: Int): VideoResult.StreamInfo {
         val capability = hardwareCapability(stream)
         return VideoResult.StreamInfo(
             id = streamKey(stream),
@@ -464,6 +505,7 @@ class StreamResolver {
             height = stream.height,
             fps = stream.fps,
             bitrate = stream.bitrate,
+            estimatedTotalBitrate = estimatedTotalBitrate,
             hardwareHint = capability.supported,
             decoderHint = capability.decoderName
         )
@@ -559,7 +601,8 @@ class StreamResolver {
             HeadUnitDiagnostics.event(
                 "StreamResolver",
                 "audio-selected itag=${selected.itag} client=${streamClient(selected.content)} codec=${selected.codec} format=${selected.format?.mimeType} " +
-                    "decoderMime=$mime hardware=${HardwareAudioCodecs.decodes(mime)} bitrate=${selected.averageBitrate}"
+                    "decoderMime=$mime hardware=${HardwareAudioCodecs.decodes(mime)} " +
+                        "bitrateRaw=${selected.averageBitrate} bitrateBps=${audioBitrateBitsPerSecond(selected.averageBitrate)}"
             )
         }
         return selected
@@ -582,16 +625,16 @@ class StreamResolver {
         if (streams.isEmpty()) return null
         // Prefer stable AAC (~128–160 kbps itag 140) over very low Opus when "auto":
         // tiny streams underrun more easily on flaky mobile networks.
-        val sorted = streams.sortedBy { it.averageBitrate }
+        val sorted = streams.sortedBy { audioBitrateBitsPerSecond(it.averageBitrate) }
         return when (bitrate.lowercase(Locale.ROOT)) {
             "low" -> sorted.firstOrNull()
             "medium" -> sorted.getOrNull(sorted.size / 2) ?: sorted.lastOrNull()
             "high" -> sorted.lastOrNull()
             else -> {
                 streams
-                    .filter { it.averageBitrate in 96_000..192_000 }
-                    .maxByOrNull { it.averageBitrate }
-                    ?: streams.maxByOrNull { it.averageBitrate }
+                    .filter { audioBitrateBitsPerSecond(it.averageBitrate) in 96_000..192_000 }
+                    .maxByOrNull { audioBitrateBitsPerSecond(it.averageBitrate) }
+                    ?: streams.maxByOrNull { audioBitrateBitsPerSecond(it.averageBitrate) }
             }
         }
     }
@@ -644,6 +687,7 @@ class StreamResolver {
             val height: Int,
             val fps: Int,
             val bitrate: Int,
+            val estimatedTotalBitrate: Int,
             val hardwareHint: Boolean,
             val decoderHint: String?
         )

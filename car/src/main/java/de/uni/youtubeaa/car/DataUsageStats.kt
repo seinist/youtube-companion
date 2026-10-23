@@ -306,6 +306,64 @@ object DataUsageStats {
     }
 
     /**
+     * Media3 reports cumulative bytes for a load task on error/retry/completion callbacks. Count
+     * only the unseen delta or the diagnostics can claim substantially more traffic than the UID
+     * actually used whenever a CDN request is retried.
+     */
+    internal class LoadByteDeltaTracker {
+        private val lastBytesByTask = HashMap<Long, Long>()
+
+        fun delta(loadTaskId: Long, bytesLoaded: Long, terminal: Boolean): Long {
+            val current = bytesLoaded.coerceAtLeast(0L)
+            val previous = lastBytesByTask[loadTaskId] ?: 0L
+            val delta = (current - previous).coerceAtLeast(0L)
+            if (terminal) lastBytesByTask.remove(loadTaskId)
+            else lastBytesByTask[loadTaskId] = maxOf(previous, current)
+            return delta
+        }
+
+        fun clear() = lastBytesByTask.clear()
+    }
+
+    /** Actual downloaded player bytes per minute of active playback, independent of resolution. */
+    internal class PlaybackRateMeter {
+        data class RateSnapshot(
+            val playedMs: Long,
+            val bytes: Map<Kind, Long>
+        ) {
+            val totalBytes: Long get() = bytes.values.sum()
+            val bytesPerMinute: Double
+                get() = if (playedMs > 0L) totalBytes.toDouble() * 60_000.0 / playedMs else 0.0
+        }
+
+        private val bytes = LongArray(Kind.entries.size)
+        private var accumulatedPlayedMs = 0L
+        private var playingSinceMs: Long? = null
+
+        fun add(kind: Kind, byteCount: Long) {
+            if (byteCount > 0L) bytes[kind.ordinal] += byteCount
+        }
+
+        fun onPlayingChanged(isPlaying: Boolean, nowMs: Long) {
+            if (isPlaying) {
+                if (playingSinceMs == null) playingSinceMs = nowMs
+            } else {
+                val started = playingSinceMs ?: return
+                accumulatedPlayedMs += (nowMs - started).coerceAtLeast(0L)
+                playingSinceMs = null
+            }
+        }
+
+        fun snapshot(nowMs: Long): RateSnapshot {
+            val activeMs = playingSinceMs?.let { (nowMs - it).coerceAtLeast(0L) } ?: 0L
+            return RateSnapshot(
+                playedMs = accumulatedPlayedMs + activeMs,
+                bytes = Kind.entries.associateWith { bytes[it.ordinal] }
+            )
+        }
+    }
+
+    /**
      * Counts completed, canceled and failed loads: all of them used the network. Pausing and
      * releasing the player flush the totals, so a killed process loses at most the loads that
      * were still running (the UID total still sees those bytes).
@@ -313,31 +371,61 @@ object DataUsageStats {
     @OptIn(markerClass = [UnstableApi::class])
     internal class Listener(
         private val context: Context,
-        private val hlsVariantsAreVideoOnly: () -> Boolean = { false }
+        private val hlsVariantsAreVideoOnly: () -> Boolean = { false },
+        private val diagnosticTag: String = "Player"
     ) : AnalyticsListener {
-        private fun count(info: LoadEventInfo, data: MediaLoadData) {
-            if (info.bytesLoaded <= 0L) return
+        private val loadDeltas = LoadByteDeltaTracker()
+        private val rateMeter = PlaybackRateMeter()
+        private var lastRateReportPlayedMs = 0L
+        private var lastRateReportBytes = 0L
+
+        private fun count(info: LoadEventInfo, data: MediaLoadData, terminal: Boolean) {
+            val byteDelta = loadDeltas.delta(info.loadTaskId, info.bytesLoaded, terminal)
+            if (byteDelta <= 0L) return
             val mime = runCatching { info.uri.getQueryParameter("mime") }.getOrNull()
             val format = data.trackFormat
-            record(
-                context,
+            val kind =
                 kindOf(
                     data.trackType,
                     data.dataType,
                     mime,
                     formatMime = format?.sampleMimeType,
                     hlsVariantsAreVideoOnly = data.trackType == C.TRACK_TYPE_DEFAULT && hlsVariantsAreVideoOnly()
-                ),
-                info.bytesLoaded,
+                )
+            record(
+                context,
+                kind,
+                byteDelta,
                 NetworkPolicy.isMeteredCached(context)
+            )
+            rateMeter.add(kind, byteDelta)
+            reportRateIfDue(force = false)
+        }
+
+        private fun reportRateIfDue(force: Boolean) {
+            val snapshot = rateMeter.snapshot(SystemClock.elapsedRealtime())
+            if (snapshot.playedMs < MIN_RATE_SAMPLE_MS || snapshot.totalBytes <= 0L) return
+            val enoughTime = snapshot.playedMs - lastRateReportPlayedMs >= RATE_REPORT_INTERVAL_MS
+            val hasNewBytes = snapshot.totalBytes > lastRateReportBytes
+            if (!enoughTime && !(force && hasNewBytes)) return
+            lastRateReportPlayedMs = snapshot.playedMs
+            lastRateReportBytes = snapshot.totalBytes
+            val mibPerMinute = snapshot.bytesPerMinute / (1024.0 * 1024.0)
+            HeadUnitDiagnostics.event(
+                diagnosticTag,
+                "traffic-rate playedMs=${snapshot.playedMs} media=${formatBytes(snapshot.totalBytes)} " +
+                    "rateMiBPerMin=${String.format(Locale.US, "%.2f", mibPerMinute)} " +
+                    Kind.entries.joinToString(" ") { kind ->
+                        "${kind.key}=${formatBytes(snapshot.bytes[kind] ?: 0L)}"
+                    }
             )
         }
 
         override fun onLoadCompleted(eventTime: AnalyticsListener.EventTime, loadEventInfo: LoadEventInfo, mediaLoadData: MediaLoadData) =
-            count(loadEventInfo, mediaLoadData)
+            count(loadEventInfo, mediaLoadData, terminal = true)
 
         override fun onLoadCanceled(eventTime: AnalyticsListener.EventTime, loadEventInfo: LoadEventInfo, mediaLoadData: MediaLoadData) =
-            count(loadEventInfo, mediaLoadData)
+            count(loadEventInfo, mediaLoadData, terminal = true).also { reportRateIfDue(force = true) }
 
         override fun onLoadError(
             eventTime: AnalyticsListener.EventTime,
@@ -345,12 +433,26 @@ object DataUsageStats {
             mediaLoadData: MediaLoadData,
             error: IOException,
             wasCanceled: Boolean
-        ) = count(loadEventInfo, mediaLoadData)
+        ) = count(loadEventInfo, mediaLoadData, terminal = false)
 
         override fun onIsPlayingChanged(eventTime: AnalyticsListener.EventTime, isPlaying: Boolean) {
-            if (!isPlaying) flush(context)
+            rateMeter.onPlayingChanged(isPlaying, SystemClock.elapsedRealtime())
+            if (!isPlaying) {
+                reportRateIfDue(force = true)
+                flush(context)
+            }
         }
 
-        override fun onPlayerReleased(eventTime: AnalyticsListener.EventTime) = flush(context)
+        override fun onPlayerReleased(eventTime: AnalyticsListener.EventTime) {
+            rateMeter.onPlayingChanged(false, SystemClock.elapsedRealtime())
+            reportRateIfDue(force = true)
+            loadDeltas.clear()
+            flush(context)
+        }
+
+        private companion object {
+            const val MIN_RATE_SAMPLE_MS = 10_000L
+            const val RATE_REPORT_INTERVAL_MS = 60_000L
+        }
     }
 }

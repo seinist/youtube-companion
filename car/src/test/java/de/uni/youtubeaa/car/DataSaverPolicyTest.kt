@@ -32,6 +32,7 @@ class DataSaverPolicyTest {
         val ceiling = DataSaverPolicy.phoneCeiling("auto", metered = false, mobileQuality = "480")
         assertEquals(1280, ceiling.maxLongSide)
         assertEquals(30, ceiling.maxFps)
+        assertEquals(1_500_000, ceiling.maxVideoBitrate)
     }
 
     @Test fun `phone auto on mobile data uses the mobile cap but never exceeds 720`() {
@@ -45,8 +46,9 @@ class DataSaverPolicyTest {
         assertEquals("1080", DataSaverPolicy.phoneResolveQuality("1080", metered = false, mobileQuality = "480"))
         assertNull(DataSaverPolicy.phoneResolveMaxFps("1080"))
         val wifi = DataSaverPolicy.phoneCeiling("1080", metered = false, mobileQuality = "480")
-        assertEquals(DataSaverPolicy.Ceiling.NONE, wifi)
-        assertFalse(wifi.limited)
+        assertEquals(1920, wifi.maxLongSide)
+        assertEquals(2_500_000, wifi.maxVideoBitrate)
+        assertTrue(wifi.limited)
 
         assertEquals("480", DataSaverPolicy.phoneResolveQuality("2160", metered = true, mobileQuality = "480"))
         val mobile = DataSaverPolicy.phoneCeiling("2160", metered = true, mobileQuality = "480")
@@ -55,6 +57,20 @@ class DataSaverPolicyTest {
         assertTrue(mobile.limited)
         // An explicit choice below the cap stays as is.
         assertEquals(640, DataSaverPolicy.phoneCeiling("360", metered = true, mobileQuality = "720").maxLongSide)
+    }
+
+    @Test fun `video bitrate budget follows effective picture height`() {
+        assertEquals(500_000, DataSaverPolicy.maxVideoBitrateForQuality("360"))
+        assertEquals(800_000, DataSaverPolicy.maxVideoBitrateForQuality("480"))
+        assertEquals(1_500_000, DataSaverPolicy.maxVideoBitrateForQuality("720"))
+        assertEquals(2_500_000, DataSaverPolicy.maxVideoBitrateForQuality("1080"))
+        assertEquals(10_000_000, DataSaverPolicy.maxVideoBitrateForQuality("2160"))
+    }
+
+    @Test fun `newpipe audio bitrate units are normalized to bits per second`() {
+        assertEquals(160_000, StreamResolver.audioBitrateBitsPerSecond(160))
+        assertEquals(128_000, StreamResolver.audioBitrateBitsPerSecond(128_000))
+        assertEquals(0, StreamResolver.audioBitrateBitsPerSecond(-1))
     }
 
     @Test fun `metered read-ahead is shortened`() {

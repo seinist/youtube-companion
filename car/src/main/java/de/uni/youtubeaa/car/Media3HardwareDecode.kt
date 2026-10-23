@@ -66,6 +66,7 @@ internal object Media3HardwareDecode {
                 if (formatKey(format) in excludedFormatKeys) continue
                 val mime = format.sampleMimeType ?: continue
                 if (!budget.fits(format.width, format.height)) continue
+                if (format.bitrate > 0 && format.bitrate > budget.maxVideoBitrate) continue
                 val sourceFps = format.frameRate.takeIf { it > 0f }?.let { ceil(it.toDouble()).toInt() } ?: 0
                 if (!budget.relaxFrameRate && sourceFps > 0 && sourceFps > budget.maxSourceFps) continue
                 val family = familyForMime(mime)

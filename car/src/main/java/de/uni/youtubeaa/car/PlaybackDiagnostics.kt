@@ -77,7 +77,11 @@ internal object PlaybackDiagnostics {
                 HeadUnitDiagnostics.event(tag, "state-changed ${state()}")
             }
         })
-        context?.applicationContext?.let { player.addAnalyticsListener(DataUsageStats.Listener(it, hlsVariantsAreVideoOnly)) }
+        context?.applicationContext?.let {
+            player.addAnalyticsListener(
+                DataUsageStats.Listener(it, hlsVariantsAreVideoOnly, diagnosticTag = tag)
+            )
+        }
         player.addAnalyticsListener(
             ClockWatchdog(
                 player,
@@ -280,7 +284,8 @@ internal object PlaybackDiagnostics {
             HeadUnitDiagnostics.event(
                 tag,
                 "video-format ${format.width}x${format.height} fps=${format.frameRate} " +
-                    "codecs=${format.codecs} mime=${format.sampleMimeType}" +
+                    "codecs=${format.codecs} mime=${format.sampleMimeType} " +
+                    "bitrate=${format.bitrate} averageBitrate=${format.averageBitrate} peakBitrate=${format.peakBitrate}" +
                     (expected?.let {
                         " resolverStream=${it.streamId} itag=${it.itag} source=${it.source} " +
                             "resolverCodec=${it.codecHint} resolverSize=${it.widthHint}x${it.heightHint} " +
