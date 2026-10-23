@@ -238,11 +238,7 @@ class YtTvAuthClient(
                 .build()
             http.newCall(request).execute().use { response ->
                 val html = response.body?.string().orEmpty()
-                val regex = Regex(
-                    """clientId:"(\d{10,}-[a-z0-9]+\.apps\.googleusercontent\.com)",F:"([^"]+)""""
-                )
-                val match = regex.find(html) ?: return null
-                ClientIdentity(match.groupValues[1], match.groupValues[2])
+                parseTvClientIdentity(html)
             }
         } catch (e: Exception) {
             Log.w(TAG, "TV client scrape failed: ${e.message}")
@@ -296,6 +292,20 @@ class YtTvAuthClient(
         private const val DEVICE_CODE_URL = "https://www.youtube.com/o/oauth2/device/code"
         private const val TOKEN_URL = "https://www.youtube.com/o/oauth2/token"
         private val JSON = "application/json; charset=utf-8".toMediaType()
+
+        /**
+         * The TV bundle is minified and regularly renames the property that contains the
+         * OAuth client secret (for example `F` became `A`). Match the object shape instead
+         * of depending on that unstable minifier-generated property name.
+         */
+        internal fun parseTvClientIdentity(html: String): ClientIdentity? {
+            val match = TV_CLIENT_IDENTITY.find(html) ?: return null
+            return ClientIdentity(match.groupValues[1], match.groupValues[2])
+        }
+
+        private val TV_CLIENT_IDENTITY = Regex(
+            """clientId\s*:\s*"(\d{10,}-[a-z0-9]+\.apps\.googleusercontent\.com)"\s*,\s*(?:[A-Za-z_$][A-Za-z0-9_$]*|"[^"]+")\s*:\s*"([^"]+)""""
+        )
 
         private fun defaultClient(): OkHttpClient =
             SharedHttp.builder(DataUsageStats.Subsystem.OTHER)
